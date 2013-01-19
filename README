@@ -95,9 +95,12 @@ with wget:
 % (cd download; ftp \
   http://only.mawhrin.net/~cdi/netbsd/cobalt/paneld.tar.gz)
 % (cd download; \
-    ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/paneld-20071101.diff)
+    ftp http://www.sigbus.net/paneld_banner_refresh.diff)
+% (cd download; \
+    ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/paneld-20071105.diff)
 % tar zxf download/paneld.tar.gz
-% patch -p < download/paneld-20071101.diff
+% patch -d paneltools -p < download/paneld_banner_refresh.diff
+% patch -p < download/paneld-20071105.diff
 % (cd usr/src; \
    sh build.sh -m cobalt -u -U -T tooldir.cobalt -D destdir.cobalt \
    -V OBJMACHINE=1 tools)
