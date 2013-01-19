@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# $NetBSD: cron,v 1.5 2000/09/19 13:04:38 lukem Exp $
+#
+
+# PROVIDE: paneld
+# REQUIRE: DAEMON LOGIN
+# KEYWORD: last
+
+. /etc/rc.subr
+
+name="paneld"
+rcvar=$name
+command="/usr/sbin/${name}"
+pidfile="/var/run/${name}.pid"
+
+load_rc_config $name
+run_rc_command "$1"

@@ -1,6 +1,0 @@
-./etc/dhcpd.conf type=file uname=root gname=wheel mode=0644
-./etc/exports type=file uname=root gname=wheel mode=0644
-./etc/fstab type=file uname=root gname=wheel mode=0644
-./etc/resolv.conf type=file uname=root gname=wheel mode=0644
-./etc/rc.d/mountmfs type=file uname=root gname=wheel mode=0555
-./etc/rc.d/netconfig type=file uname=root gname=wheel mode=0555

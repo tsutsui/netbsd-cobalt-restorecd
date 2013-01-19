@@ -37,7 +37,7 @@ printmsg()
 
 align_size()
 {
-    sz=`expr "$1" / "$disk_align" \* "$disk_align"`
+	sz=`expr "$1" / "$disk_align" \* "$disk_align"`
 
 	if [ $1 -gt $sz ]; then
 		align=`expr "$sz" + "$disk_align"`
@@ -82,7 +82,8 @@ create_altroot()
 	get_slice_size $e2fs_size
 	altrootsize=`expr $size - $disk_reserved`
 
-	$FDISK -0 -f -u -b $DLCYL/$DLHEAD/$DLSEC -s $LINUX_PART/$disk_reserved/$altrootsize $DISK
+	$FDISK -0 -f -u -b $DLCYL/$DLHEAD/$DLSEC \
+	    -s $LINUX_PART/$disk_reserved/$altrootsize $DISK
 
 	update_avail $size
 
@@ -98,7 +99,8 @@ create_swap()
 	req_size=`expr $req_size \* 2`
 
 	get_slice_size $req_size
-	$FDISK -1 -f -u -b $DLCYL/$DLHEAD/$DLSEC -s $LINUX_SWAP/$part_start/$size $DISK
+	$FDISK -1 -f -u -b $DLCYL/$DLHEAD/$DLSEC \
+	    -s $LINUX_SWAP/$part_start/$size $DISK
 
 	echo " b: $size $part_start swap" >> $PTAB
 
@@ -110,7 +112,8 @@ create_42bsd()
 {
 	printmsg "Disk Setup" "Add BSD slice"
 
-	$FDISK -2 -f -u -b $DLCYL/$DLHEAD/$DLSEC -s $NETBSD_PART/$part_start/$disk_avail $DISK
+	$FDISK -2 -f -u -b $DLCYL/$DLHEAD/$DLSEC \
+	    -s $NETBSD_PART/$part_start/$disk_avail $DISK
 
 	echo " c: $disk_avail $part_start unused 0 0" >> $PTAB
 	echo " d: $DLSIZE 0 unused 0 0" >> $PTAB
@@ -213,11 +216,13 @@ install_boot()
 	printmsg "Disk Setup" "Setup /boot"
 
 	$MOUNT $ALTROOT_DEV /mnt
-	mkdir /mnt/boot
+	$MKDIR /mnt/boot
+	$MKDIR /mnt/usr /mnt/usr/games
 
 	# Copy boot loader and the kernels as a backup measure
 	$CP /cobalt/binary/kernel/boot.gz /mnt/boot
 	$CP /cobalt/binary/kernel/netbsd-INSTALL.gz /mnt/boot
+	$LN /mnt/boot/netbsd-INSTALL.gz /mnt/usr/games/.doug
 
 	cd /mnt/boot
 	for i in $RAQ_KERNELS; do
@@ -233,6 +238,8 @@ install_files()
 	printmsg "System install" "Prepare..."
 
 	$MOUNT $MOUNT_FFS_OPT $ROOT_DEV /mnt
+
+	$MKDIR /mnt/kern /mnt/proc /mnt/dev/pts
 
 	$MKDIR /mnt/var
 	$MOUNT $MOUNT_FFS_OPT $VAR_DEV /mnt/var
@@ -294,7 +301,7 @@ install()
 {
 	# installation entry point
 	$RM -f $PTAB
-	touch $PTAB
+	$TOUCH $PTAB
 
 	# Create LCD device
 	cd /dev && ./MAKEDEV panel

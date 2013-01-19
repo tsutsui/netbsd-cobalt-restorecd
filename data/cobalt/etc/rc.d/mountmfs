@@ -23,32 +23,28 @@ printmsg()
 	fi
 
 	echo "$_category: $_message"
-	printf "%-16s%-16s" "$_category:" "  $_message" > /dev/panel0
+	printf "%-16s%-16s" "$_category" "  $_message" > /dev/panel0
 }
 
 mountmfs_start()
 {
 	PWD=`/bin/pwd`
 
-	printmsg "Coming up" "Create /dev/*"
+	printmsg "[Starting up]" "Create /dev/*"
 
 	cd /dev
 	/bin/sh ./MAKEDEV all >/dev/null 2>&1
 	cd $PWD
 
-	printmsg "Coming up" "Unpack /var/*"
+	printmsg "[Starting up]" "Unpack /var/*"
+
+	mount -a -t nonfs >/dev/null 2>&1
 
 	cd /altvar
-
-	# It barfs about /dev/ being used. Oh well.
-	umount -a >/dev/null 2>&1
-	mount -a -t nonfs >/dev/null 2>&1
 	/bin/pax -rw -pe * /var
 	cd $PWD
 
-	/usr/bin/touch /var/db/dhcpd.leases
-
-	printmsg "Coming up" "Please wait..."
+	printmsg "[Starting up]" "Please wait..."
 }
 
 load_rc_config $name

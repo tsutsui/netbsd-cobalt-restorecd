@@ -81,6 +81,9 @@ do_prepare()
 	[ -d $_dir/var/spool/ftp/hidden ] &&
 		rmdir $_dir/var/spool/ftp/hidden
 
+	# /etc/motd will be prepared on union mfs at boot
+	$mv $_dir/etc/motd $_dir/etc/motd.tmpl
+
 	# Unpack installation kernel image
 	[ ! -f "$_kerndir/$_kern" ] &&
 		err 255 "Kernel image '$_kerndir/$_kern' not found."
@@ -149,45 +152,6 @@ prepare_nfsroot()
 }
 
 #
-# build_boot_kernel <version> <source> <tooldir> <builddir>
-#	Build boot server kernel.
-#
-build_boot_kernel()
-{
-	_version="$1"; _source="$2"; _tooldir="$3"; _builddir="$4"
-
-	[ -f "$_builddir/netbsd" ] && {
-		log " + Kernel already exists, kernel build skipped"
-		return
-	}
-		
-	_nbconfig="$_tooldir/bin/nbconfig"
-	_nbmake="$_tooldir/bin/nbmake-i386"
-	[ ! -x "$_nbconfig" -o ! -x "$_nbmake" ] &&
-		err 255 "There is no 'nbmake' or 'nbconfig' in tool directory."
-
-	_kernel_generic="$_source/sys/arch/i386/conf/GENERIC"
-	[ ! -f "$_kernel_generic" ] &&
-		err 255 "Missing kernel config file '$_kernel_generic'."
-
-	$rm -rf "$_builddir"
-	$mkdir -p "$_builddir" ||
-		err 255 "Can't create '$_builddir' directory."
-
-	_kernel_cdroot="$_builddir/GENERIC.CDROOT"
-	$cp "$basedir/data/conf/i386/kern.cdroot" "$_kernel_cdroot"
-
-	log " + Running 'config(1)' utility..."
-	"$_nbconfig" -s "$_source/sys" -b "$_builddir" "$_kernel_cdroot"
-
-	log " + Calculating source dependencies..."
-	cd "$_builddir" && "$_nbmake" depend
-
-	log " + Building the kernel..."
-	cd "$_builddir" && "$_nbmake"
-}
-
-#
 # prepare_cdroot <server> <cddir>
 #	Create infrastructure necessary for the host computer to boot.
 #
@@ -211,26 +175,8 @@ prepare_cdroot()
 	log "Copying machine dependent bits..."
 	( cd $basedir/data/i386 && tar cpf - * ) | ( cd $_rootdir && tar xpf - )
 
-	cd $_rootdir && $cp $basedir/data/common/.cshrc root/
-}
-
-#
-# fix_boot_fs <server> <source> <cddir> <tooldir> <tmpdir>
-#	Rebuild default boot floppy image, uses _root_version
-#	defined by prepare_cdinstructions.
-#
-fix_boot_fs()
-{
-	_server="$1"; _source="$2"; _cddir="$3"; _tooldir="$4"; _tmpdir="$5"
-
-	log "Building boot kernel..."
-	build_boot_kernel "$_root_version" "$_source" "$_tooldir" \
-		"$_tmpdir/kern"
-	[ ! -f "$_tmpdir/kern/netbsd" ] &&
-		err 255 " Failed to build server kernel."
-
-	$cp $_tmpdir/kern/netbsd $_cddir || err 255 "Can't copy kernel."
 	$cp $_cddir/usr/mdec/boot $_cddir || err 255 "Can't copy bootloader."
+	cd $_rootdir && $cp $basedir/data/common/.cshrc root/
 }
 
 #
@@ -246,10 +192,8 @@ prepare_cddir()
 	prepare_cdroot "$_server" "$_cddir"
 	prepare_nfsroot "$_client" "$_cddir"
 
-	prepare_cdinstructions "$_server" "$_client" "$_cddir"
-
 	# This one uses _nfsroot_version defined by the above function.
-	fix_boot_fs "$_server" "$_source" "$_cddir" "$_tooldir" "$_tmpdir"
+	prepare_cdinstructions "$_server" "$_client" "$_cddir"
 }
 
 #
@@ -270,12 +214,8 @@ get_version()
 		err 255 "'$_param' is missing, can't get OS version."
 
 	_version=`${awk} '
-	/^#define[ 	]*__NetBSD_Version__/ {
-		major = ($3 / 100000000);
-		minor = ($3 / 1000000) % 100;
-		patch = ($3 / 100) % 100;
-		printf("%d.%d.%d\n", major, minor, patch);
-	}' "$_param"`
+	/^#define[ 	]*__NetBSD_Version__/ { printf $6 }' "$_param"`
+	$rm -f $_param
 }
 
 #
@@ -335,14 +275,19 @@ create_cd()
 
 	_specfile=$_tmpdir/spec
 	_specroot=$_tmpdir/spec.root
+	_specetc=$_tmpdir/spec.etc
 	_specnfsroot=$_tmpdir/spec.nfsroot
-	$rm -f $_specfile $_specroot $_specnfsroot
+	$rm -f $_specfile $_specroot $_specetc $_specnfsroot
+	# /etc/motd will be generated from /etc/motd.tmpl on union mfs
 	$cat $_cddir/etc/mtree/set.base  $_cddir/etc/mtree/set.etc | \
+	    $sed -e 's,^\./etc/motd,\./etc/motd.tmpl,' > $_specetc
+	# /var is mounted as mfs and files will be copied from /altvar
+	$cat $_cddir/etc/mtree/set.base  $_specetc | \
 	    $sed -e 's,^\./var,./altvar,' > $_specroot
-	$cat ${_specfile}.root | \
-	    $sed -e 's,^\./,./nfsroot/,' > $_specnfsroot
-	$cat $basedir/data/common/spec.root $_specroot \
-	    $_specnfsroot $basedir/data/common/spec.etc > $_specfile
+	# use the same permissions on nfsroot for cobalt
+	$cat $_specroot | $sed -e 's,^\./,./nfsroot/,' > $_specnfsroot
+	$cat $_specroot $basedir/data/common/spec.root \
+	    $_specnfsroot $basedir/data/common/spec.nfsroot > $_specfile
 
 	_bootxx=$_cddir/usr/mdec/bootxx_cd9660
 	"$_nbmakefs" -t cd9660 -F $_specfile -o \
@@ -367,7 +312,7 @@ usage()
 	$echo "                 for client to netboot"
 	$echo "    source       NetBSD sources which were used to build all"
 	$echo "                 of the above"
-	$echo "    tooldir      Build tools for boot server architecture"
+	$echo "    tooldir      Build tools directory which has makefs(1)"
 	$echo ""
 	$echo "Optional parameters:"
 	$echo "    tmpdir       Place to keep CD data"

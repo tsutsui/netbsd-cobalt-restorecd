@@ -2,15 +2,15 @@ Typical 'restorecd' script invocation:
 
 0. fetch and extract newer restorecd-*.tar.gz
 
-% ftp ftp://ftp.NetBSD.org/pub/NetBSD/misc/cobalt/restorecd/4.99.72/restorecd-20081008.tar.gz
+% ftp [URL to path]/restorecd-current-20081028.tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20080912.tar.gz
-% cd restorecd
+% tar zxf restorecd-20081028.tar.gz
+% cd restorecd-current
 
   Then just type "make", or try the following procedure:
 
 1. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
-   (use appropriate mirrors)
+   (use appropriate mirrors; see http://www.NetBSD.org/mirrors/)
 
  Check daily snapshot status:
   http://releng.NetBSD.org/cgi-bin/builds.cgi
@@ -18,11 +18,11 @@ Typical 'restorecd' script invocation:
 
 with rsync:
 % rsync -va --files-from=restorecd-fetch.lst \
-    rsync://rsync.NetBSD.org/NetBSD-daily/HEAD/20081006002Z download
+    rsync://rsync.NetBSD.org/NetBSD-daily/HEAD/20081028002Z download
 
 with wget:
 % (cd download ; \
-  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD-daily/HEAD/200810060002Z/ \
+  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD-daily/HEAD/200810280002Z/ \
   --no-host-directories --cut-dirs=3 --timestamping --force-directories \
   --input-file=../restorecd-fetch.lst)
 
@@ -30,10 +30,10 @@ with wget:
 
 2. extract NetBSD sources
 
-% tar zxpf download/source/sets/gnusrc.tgz
-% tar zxpf download/source/sets/sharesrc.tgz
-% tar zxpf download/source/sets/src.tgz
-% tar zxpf download/source/sets/syssrc.tgz
+% tar zxf download/source/sets/gnusrc.tgz
+% tar zxf download/source/sets/sharesrc.tgz
+% tar zxf download/source/sets/src.tgz
+% tar zxf download/source/sets/syssrc.tgz
 
 2a. rebuild paneld(8)
 
@@ -56,43 +56,38 @@ with wget:
 2a-(2) build paneld(8) binaries
 
 % tar zxf patch/paneld.tar.gz
-% patch -d paneltools -p < download/paneld_banner_refresh.diff
-% patch -p < patch/paneld-20080912.diff
+% patch -d paneltools -p0 < download/paneld_banner_refresh.diff
+% patch -p0 < patch/paneld-20080912.diff
 
 % (cd paneltools/paneld && \
    ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
    ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt dependall)
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 555 \
    paneltools/paneld/obj.cobalt/paneld data/cobalt/install/files/usr/sbin
+% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 555 \
+   paneltools/paneld/obj.cobalt/paneld data/cobalt/usr/sbin
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
    paneltools/paneld/paneld.conf.5 \
    data/cobalt/install/files/usr/share/man/man5
-% mkdir -p data/cobalt/install/files/usr/share/man/cat5
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
    paneltools/paneld/obj.cobalt/paneld.conf.cat5 \
    data/cobalt/install/files/usr/share/man/cat5/paneld.conf.0
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
    paneltools/paneld/paneld.8 \
    data/cobalt/install/files/usr/share/man/man8
-% mkdir -p data/cobalt/install/files/usr/share/man/cat8
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
    paneltools/paneld/obj.cobalt/paneld.cat8 \
    data/cobalt/install/files/usr/share/man/cat8/paneld.0
 
-3. build tools to build i386 server's kernel and boot image
-
-% (cd usr/src; sh build.sh -m i386 -u -U -T tooldir.i386 -V OBJMACHINE=1 tools)
-
-   NOTE1: check your TOOLDIR in the build log here.
-   NOTE2: make sure /etc/mk.conf not to override $TOOLDIR
-
-4. execute restorecd script
+3. execute restorecd script
 
 % sh restorecd server=`pwd`/download \
                client=`pwd`/download \
                source=`pwd`/usr/src  \
-               tooldir=`pwd`/usr/src/tooldir.i386 -v
+               tooldir=`pwd`/usr/src/tooldir.cobalt -v
 
    NOTE1: use absolute paths to extracted restorecd dir (otherwise it fails)
-   NOTE2: use your TOOLDIR for tooldir= arg if it isn't .../usr/src/tooldir.i386 
+   NOTE2: use your TOOLDIR for tooldir= arg
+          if it isn't .../usr/src/tooldir.cobalt
+
   Now you have an iso image in cd.tmp dir

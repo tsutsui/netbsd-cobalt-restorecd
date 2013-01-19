@@ -1,3 +1,4 @@
+#!/bin/sh
 
 . /install/scripts/install-env.sh
 

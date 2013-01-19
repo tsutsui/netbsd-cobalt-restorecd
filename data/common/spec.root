@@ -1,8 +1,18 @@
-/set uname=root gname=wheel
-
 . type=dir uname=root gname=wheel mode=0755
 ./boot type=file uname=root gname=wheel mode=0444
+./etc/dhcpd.conf type=file uname=root gname=wheel mode=0644
+./etc/exports type=file uname=root gname=wheel mode=0644
+./etc/fstab type=file uname=root gname=wheel mode=0644
+./etc/namedb/10 type=file uname=root gname=wheel mode=0644
+./etc/namedb/255 type=file uname=root gname=wheel mode=0644
+./etc/namedb/netbsd.org type=file uname=root gname=wheel mode=0644
+./etc/resolv.conf type=file uname=root gname=wheel mode=0644
+./etc/rc.d/mountmfs type=file uname=root gname=wheel mode=0555
+./etc/rc.d/netconfig type=file uname=root gname=wheel mode=0555
 ./home type=dir uname=root gname=wheel mode=0755
+./instructions.txt type=link uname=root gname=wheel mode=0755
 ./netbsd type=file uname=root gname=wheel mode=0755
 ./nfsroot type=dir uname=root gname=wheel mode=0755
+./root/CHANGES type=file uname=root gname=wheel mode=0644
+./root/instructions.txt type=file uname=root gname=wheel mode=0644
 ./var type=dir uname=root gname=wheel mode=0755

@@ -44,8 +44,18 @@ the installation.
 	until "Net Booting" appears on the LCD display, then release the
 	buttons.
 
-4.	Wait until the box reboots.  Finally, the box host name and IP address
-	should appear on the LCD screen.  This indicates installation success.
+4.	Wait until the box reboots.  If it's ready, "restorecd ready" message
+	and IP address should appear on the LCD screen.
+	If you need remote login access for recovery without restoreing,
+	you can login your cobalt at this point.
+	To start restorecd operation, push and hold the "Select" button,
+	select "Restore" menu, and select [Y] and execute to
+	start installation.
+
+5.	Wait until the box reboots again.
+	The installation process will be shown on the LCD.
+	Finally, the box host name and IP address should appear
+	on the LCD screen.  This indicates installation success.
 
 Warning: Please note that the installation process may take a while.  Do not
 interrupt it until it is finished.
@@ -54,13 +64,13 @@ Warning: A freshly installed box is configured as a DHCP client i.e. it tries
 to obtain its IP address over the network from a DHCP server.  To disable
 this, change /etc/rc.conf to contain "dhclient=NO" line.
 
-5.	BE AWARE that a newly installed box is left in a highly insecure state.
+6.	BE AWARE that a newly installed box is left in a highly insecure state.
 	All ttys are open by default and allow root access over the network.
 	Also, telnet and rlogin ports are open.  This is done to allow you
 	to login into the fresh box in order to make necessary configuration
 	changes.  Please do not forget to bring your box to a secure state.
 
-6.	type 'man afterboot' and start reading :)  Some of the information is
+7.	type 'man afterboot' and start reading :)  Some of the information is
 	not applicable to the cobalt architecture, but will give you some
 	background information on configuring NetBSD in general.
 
@@ -116,20 +126,20 @@ A: Please report this to port-cobalt@netbsd.org.  In the meantime, use the
 	# ln boot.gz vmlinux_raq-2800.gz
 
 Please report any problems not covered by this section to
-port-cobalt@netbsd.org.
+port-cobalt@NetBSD.org.
 
 ===================
 Further Information
 ===================
 
 NetBSD home page
-	http://www.netbsd.org/
+	http://www.NetBSD.org/
 
 NetBSD/cobalt port page
-	http://www.netbsd.org/Ports/cobalt/
+	http://www.NetBSD.org/oorts/cobalt/
 
 NetBSD/cobalt FAQ
-	http://www.netbsd.org/Ports/cobalt/faq.html
+	http://www.NetBSD.org/ports/cobalt/faq.html
 
 general instructions on configuring a fresh NetBSD install
 	man afterboot
@@ -149,3 +159,8 @@ NetBSD Cobalt users -- for testing and many useful suggestions. Without you,
 this work would have never been done!
 
 Alex Pelts -- for the excellent instructions on how to create a restore CD.
+
+Dennis Chernoivanov -- for creating the initial NetBSD restorecd script and
+writing paneld utility.
+
+Nolan Leake -- for providing the periodic banner refresh patch for paneld

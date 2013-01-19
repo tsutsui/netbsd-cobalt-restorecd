@@ -21,6 +21,7 @@ MKDIR=/bin/mkdir
 MKNOD=/sbin/mknod
 PAX=/bin/pax
 SED=/usr/bin/sed
+TOUCH=/usr/bin/touch
 
 INSTALL_SH=/tmp/install.sh
 INSTALL_CORE=/install/scripts/install-core.sh
