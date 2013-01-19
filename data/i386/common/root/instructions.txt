@@ -1,6 +1,6 @@
 ===============================================================================
 The NetBSD Foundation, Inc.
-NetBSD/cobalt Installation CD [__REL__] [Host OS: NetBSD __HREL__]
+NetBSD/cobalt Installation CD/USB [__REL__] [Host OS: NetBSD __HREL__]
 ===============================================================================
 
 Welcome to the NetBSD/cobalt installation.
@@ -19,20 +19,21 @@ The target system should be a MIPS-based Cobalt server appliance.
 To assist in the installation, you need an Intel-Compatible PC Desktop
 or Laptop with
 
- - IDE (ATAPI) or SCSI CD-ROM
+ - IDE (ATAPI) or SCSI CD-ROM (for Restore CD)
+ - USB interface (for Restore USB)
  - At least one network card
 
-This computer MUST be CD-ROM-bootable.  The hard drive of the PC will
-not be disturbed, but the machine will need to be rebooted from the
-CD-ROM as part of the installation.
+This computer MUST be CD-ROM or USB bootable.  The hard drive of the PC
+will not be disturbed, but the machine will need to be rebooted from
+the CD-ROM as part of the installation.
 
 ========================
 Installation Limitations
 ========================
 
-Please note that this restore CD is targetted at Cobalt MIPS-based appliances
-and clones (e.g. Gateway Microserver).  Intel-based server appliances cannot
-be installed using this CD-ROM.
+Please note that this restore CD/USB is targetted at Cobalt MIPS-based
+appliances and clones (e.g. Gateway Microserver).
+Intel-based server appliances cannot be installed using this CD-ROM/USB.
 
 =====================
 Installation Overview
@@ -41,13 +42,13 @@ Installation Overview
 The installation instructions below will in order perform the
 following steps:
 
- o Boot the assisting PC from the Restore CD.  This will enable a dhcp
+ o Boot the assisting PC from the Restore CD/USB.  This will enable a dhcp
    server on the PC and other services which the server appliance will
    need during installation.
  o (re)boot the Cobalt server appliance in a state where it is
-   prepared to retreive the restore CD contents
+   prepared to retreive the restore CD/USB contents
  o Re-initialize the Cobalt server appliance from the assisting PC's
-   restore CD
+   restore CD/USB
 
 =========================
 Installation Instructions
@@ -57,13 +58,13 @@ Warning: THIS INSTALLATION WILL DESTROY THE EXISTING CONTENTS OF THE SERVER
 APPLIANCE'S HARD DRIVE.  Ensure you have sufficient backups before starting
 the installation.
 
-Note: restorecd doesn't use harddisk on the i386 server at all.
+Note: restorecd/usb don't use harddisk on the i386 server at all.
 
 1.	Connect this computer to the server appliance using either a crossover
 	cable or hub/switch.
 
 2.      Check your i386 server's manuals to see how to boot from
-        its CDROM drive, then boot it from the Restore CD.
+        its CDROM drive or USB, then boot it from the Restore CD/USB.
 
         If you are reading this message on your i386 server during boot,
         it has aready done of cource.

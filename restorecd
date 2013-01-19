@@ -152,12 +152,12 @@ prepare_nfsroot()
 }
 
 #
-# prepare_cdroot <server> <cddir>
+# prepare_cdroot <server> <cddir> <media>
 #	Create infrastructure necessary for the host computer to boot.
 #
 prepare_cdroot()
 {
-	_server="$1" ; _rootdir="$2"
+	_server="$1" ; _rootdir="$2" ; _media="$3"
 
 	_sets="base.tgz etc.tgz"
 	_kern="netbsd-GENERIC.gz"
@@ -173,22 +173,31 @@ prepare_cdroot()
 		err 255 "Cannot create '$_bootfsdir' directory."
 
 	log "Copying machine dependent bits..."
-	( cd $basedir/data/i386 && tar cpf - * ) | ( cd $_rootdir && tar xpf - )
+	( cd $basedir/data/i386/common && tar cpf - * ) | \
+	    ( cd $_rootdir && tar xpf - )
+	if [ "$_media" = "cd" ]; then
+		( cd $basedir/data/i386/cd && tar cpf - * ) | \
+		    ( cd $_rootdir && tar xpf - )
+	fi
+	if [ "$_media" = "usb" ]; then
+		( cd $basedir/data/i386/usb && tar cpf - * ) | \
+		    ( cd $_rootdir && tar xpf - )
+	fi
 
 	$cp $_cddir/usr/mdec/boot $_cddir || err 255 "Can't copy bootloader."
 }
 
 #
-# prepare_cddir <server> <client> <cddir> <filename> <source> <makefs>
-#               <tmpdir>
+# prepare_cddir <server> <client> <cddir> <filename> <source> <tooldir>
+#               <tmpdir> <media>
 #	Prepares CD directory suitable for later use with makefs(8).
 #
 prepare_cddir()
 {
 	_server="$1"; _client="$2"; _cddir="$3"; _filename="$4"; _source="$5"
-	_makefs="$6"; _tmpdir="$7"
+	_tooldir="$6"; _tmpdir="$7"; _media="$8"
 
-	prepare_cdroot "$_server" "$_cddir"
+	prepare_cdroot "$_server" "$_cddir" "$_media"
 	prepare_nfsroot "$_client" "$_cddir"
 
 	# This one uses _nfsroot_version defined by the above function.
@@ -249,16 +258,16 @@ prepare_cdinstructions()
 }
 
 #
-# create_cd <server> <client> <cddir> <filename> <source> <makefs>
-#           <tmpdir>
-#	Store all required binaries in <tmpdir> and build ISO image.
+# create_cd <server> <client> <cddir> <filename> <source> <tooldir>
+#           <tmpdir> <media>
+#	Store all required binaries in <tmpdir> and build ISO/FFS image.
 #
 create_cd()
 {
 	prepare_cddir "$@"
 
 	_server="$1"; _client="$2"; _cddir="$3"; _filename="$4"; _source="$5"
-	_makefs="$6"; _tmpdir="$7"
+	_tooldir="$6"; _tmpdir="$7"; _media="$8"
 
 	[ -z "$_filename" ] && {
 		warn "No CD image name supplied, suppress image build."
@@ -266,7 +275,13 @@ create_cd()
 	}
 
 	[ -f "$_filename" ] && $rm -f "$opt_filename"
-	log "Making ISO image '$_filename'..."
+
+	if [ "$_media" = "cd" ]; then
+		log "Making ISO image '$_filename'..."
+	fi
+	if [ "$_media" = "usb" ]; then
+		log "Making FFS image '$_filename'..."
+	fi
 
 	_imagedir=`$dirname $_filename`
 	[ ! -z "$_imagedir" ] && {
@@ -295,11 +310,66 @@ create_cd()
 	$cat $_specroot $basedir/data/common/spec.root \
 	    $_specnfsroot $basedir/data/common/spec.nfsroot > $_specfile
 
-	_bootxx=$_cddir/usr/mdec/bootxx_cd9660
-	"$_makefs" -t cd9660 -F $_specfile -N $_cddir/etc -o \
-	    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot,allow-multidot \
-	    "$_filename".tmp $_cddir && \
-	    mv "$_filename".tmp "$_filename"
+	if [ "$_media" = "cd" ]; then
+		_bootxx=$_cddir/usr/mdec/bootxx_cd9660
+		"$_tooldir"/bin/nbmakefs -t cd9660 \
+		    -F $_specfile -N $_cddir/etc -o \
+		    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot,allow-multidot \
+		    "$_filename".tmp $_cddir && \
+		    mv "$_filename".tmp "$_filename"
+		log "Building restorecd complete."
+	fi
+	if [ "$_media" = "usb" ]; then
+		FSSIZE=`expr 512 \* 1000 \* 1000`
+		FSSECTORS=`expr ${FSSIZE} / 512`
+		HEADS=64
+		SECTORS=32
+		FSCYLINDERS=`expr ${FSSECTORS} / \( ${HEADS} \* ${SECTORS} \)`
+		FRAGSIZE=2048
+		BLOCKSIZE=16384
+		DENSITY=8192
+		_bootxx=$_cddir/usr/mdec/bootxx_ffsv1
+		_labelproto=$_tmpdir/label.proto
+		"$_tooldir"/bin/nbmakefs -t ffs \
+		    -M ${FSSIZE} -m ${FSSIZE} \
+		    -F $_specfile -N $_cddir/etc \
+		    -o bsize=${BLOCKSIZE},fsize=${FRAGSIZE},density=${DENSITY} \
+		    "$_filename".tmp $_cddir
+		"$_tooldir"/bin/nbinstallboot -v -m i386 \
+		    "$_filename".tmp $_bootxx
+		log "Preparing disklabel..."
+		cat > $_labelproto <<EOF
+type: ESDI
+disk: restoreUSB
+label: 
+flags:
+bytes/sector: 512
+sectors/track: ${SECTORS}
+tracks/cylinder: ${HEADS}
+sectors/cylinder: `expr ${HEADS} \* ${SECTORS}`
+cylinders: ${FSCYLINDERS}
+total sectors: ${FSSECTORS}
+rpm: 3600
+interleave: 1
+trackskew: 0
+cylinderskew: 0
+headswitch: 0           # microseconds
+track-to-track seek: 0  # microseconds
+drivedata: 0 
+
+8 partitions:
+#        size    offset     fstype [fsize bsize cpg/sgs]
+a:    ${FSSECTORS} 0 4.2BSD ${FRAGSIZE} ${BLOCKSIZE} 128
+c:    ${FSSECTORS} 0 unused 0 0
+d:    ${FSSECTORS} 0 unused 0 0
+EOF
+		# XXX we have not built tools nbdisklabel-i386 here,
+		# XXX but cobalt has a compatible label...
+		"$_tooldir"/bin/nbdisklabel-cobalt -R -F "$_filename".tmp $_labelproto
+		mv "$_filename".tmp "$_filename"
+		log "Building restoreusb complete."
+
+	fi
 }
 
 #
@@ -318,11 +388,13 @@ usage()
 	$echo "                 for client to netboot"
 	$echo "    source       NetBSD sources which were used to build all"
 	$echo "                 of the above"
-	$echo "    makefs       Path to makefs(1) tool"
+	$echo "    tooldir      Path to tools (including makefs(1) etc.)"
+	$echo "                 of the above"
+	$echo "    media        Target restoreCD/USB media (\"cd\" or \"usb\")"
 	$echo ""
 	$echo "Optional parameters:"
-	$echo "    tmpdir       Place to keep CD data"
-	$echo "    filename     CD image name"
+	$echo "    tmpdir       Place to keep CD/USB data"
+	$echo "    filename     CD/USB image name"
 	$echo ""
 	exit 1
 }
@@ -370,20 +442,30 @@ bootstrap()
 	[ -z "$opt_server" ] && usage
 	[ -z "$opt_client" ] && usage
 	[ -z "$opt_source" ] && usage
-	[ -z "$opt_makefs" ] && usage
+	[ -z "$opt_tooldir" ] && usage
+	[ "$opt_media" != "cd" -a "$opt_media" != "usb" ]  && usage
 
-	[ -z "$opt_tmpdir" ] && opt_tmpdir="$basedir/cd.tmp"
-	[ -z "$opt_indir" ] && opt_indir="$opt_tmpdir/restorecd"
+	[ -z "$opt_tmpdir" -a "$opt_media" = "cd" ] && \
+		opt_tmpdir="$basedir/cd.tmp"
+	[ -z "$opt_tmpdir" -a "$opt_media" = "usb" ] && \
+		opt_tmpdir="$basedir/usb.tmp"
+	[ -z "$opt_indir" -a "$opt_media" = "cd" ] && \
+		opt_indir="$opt_tmpdir/restorecd"
+	[ -z "$opt_indir" -a "$opt_media" = "usb" ] && \
+		opt_indir="$opt_tmpdir/restoreusb"
 	[ -z "$opt_outdir" ] && opt_outdir="$opt_tmpdir"
 
-	[ -z "$opt_filename" ] && opt_filename="$opt_outdir/restorecd.iso"
+	[ -z "$opt_filename" -a "$opt_media" = "cd" ] && \
+		opt_filename="$opt_outdir/restorecd.iso"
+	[ -z "$opt_filename" -a "$opt_media" = "usb" ] && \
+		opt_filename="$opt_outdir/restoreusb.img"
 }
 
 main()
 {
 	bootstrap "$@"
 	create_cd "$opt_server" "$opt_client" "$opt_indir" "$opt_filename" \
-		  "$opt_source" "$opt_makefs" "$opt_tmpdir"
+		  "$opt_source" "$opt_tooldir" "$opt_tmpdir" "$opt_media"
 
 	exit 0
 }

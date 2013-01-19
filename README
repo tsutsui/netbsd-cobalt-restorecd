@@ -89,7 +89,7 @@ with wget:
 % sh restorecd server=`pwd`/download \
                client=`pwd`/download \
                source=`pwd`/usr/src  \
-               makefs=`pwd`/usr/src/tooldir.cobalt/bin/nbmakefs -v
+               tooldir=`pwd`/usr/src/tooldir.cobalt media=cd -v
 
    NOTE1: use absolute paths to extracted restorecd dir (otherwise it fails)
    NOTE2: use your TOOLDIR path for makefs= arg

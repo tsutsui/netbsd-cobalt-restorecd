@@ -1,3 +1,12 @@
+[20120109] Welcome to 5.1.1 release
+================================
+
+Changes:
+--------
+ - NetBSD 5.1.1 release binaries
+ - Pull makefs(8) ISO RRIP fixes (PR bin/44114) for restorecd build
+ - Add experimental "restoreUSB" image for >512MB USB memory sticks
+
 [20101114] Welcome to 5.1 release
 ================================
 

@@ -1,0 +1,5 @@
+#/etc/fstab
+/dev/sd0a /	ffs	ro					0	0
+swap	/etc	mfs	rw,union,-s=1m				0	0
+swap	/var    mfs	rw,-s=4m				0	0
+swap	/tmp    mfs	rw,nodev,noexec,nosuid,-s=1m		0	0

@@ -23,14 +23,15 @@ TOUCH?=		touch
 #    and specify appropriate date directory.
 
 #FTP_HOST?=	ftp.NetBSD.org
-FTP_HOST=	ftp.jp.NetBSD.org
-#FTP_HOST=	ftp7.jp.NetBSD.org
+#FTP_HOST=	ftp.jp.NetBSD.org
+FTP_HOST=	ftp7.jp.NetBSD.org
 
-#DAILY_DIR?=	201011130000Z
+#DAILY_DIR?=	201201010000Z
 #FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD/NetBSD-5.0
-FTP_DIR?=	pub/NetBSD/NetBSD-5.1
+#FTP_DIR?=	pub/NetBSD/NetBSD-5.1
+FTP_DIR?=	pub/NetBSD/NetBSD-5.1.1
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
 # adjuct NCUTDIR by FTP_DIR where you'll get files
@@ -47,7 +48,8 @@ RSYNC_PREFIX?=
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/HEAD/${DAILY_DIR}
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-5/${DAILY_DIR}
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.0
-RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.1
+#RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.1
+RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.1.1
 RSYNC_URL?=	rsync://${RSYNC_HOST}/${RSYNC_DIR}
 
 DOWNLOADDIR=	download
@@ -58,7 +60,7 @@ SRCSETS=	${SOURCESETSDIR}/src.tgz
 SYSSRCSETS=	${SOURCESETSDIR}/syssrc.tgz
 ALLSRCSETS=	${GNUSRCSETS} ${SHARESRCSETS} ${SRCSETS} ${SYSSRCSETS}
 
-all: restorecd
+all: restorecd restoreusb
 
 DONE_FETCH=	.done_fetch
 
@@ -150,11 +152,22 @@ ${RESTORECD_ISO}: ${DONE_PANELD} ${DONE_COBALT_TOOLS}
 	${SH} restorecd server=`pwd`/${DOWNLOADDIR} \
                client=`pwd`/${DOWNLOADDIR} \
                source=`pwd`/usr/src  \
-               makefs=`pwd`/usr/src/tooldir.cobalt/bin/nbmakefs -v
+               tooldir=`pwd`/usr/src/tooldir.cobalt media=cd -v
+
+RESTOREUSB_IMG=	usb.tmp/restorecd.img
+
+restoreusb: ${RESTOREUSB_IMG}
+
+${RESTOREUSB_IMG}: ${DONE_PANELD} ${DONE_COBALT_TOOLS}
+	${SH} restorecd server=`pwd`/${DOWNLOADDIR} \
+               client=`pwd`/${DOWNLOADDIR} \
+               source=`pwd`/usr/src  \
+               tooldir=`pwd`/usr/src/tooldir.cobalt media=usb -v
 
 clean:
 	rm -f .done_*
 	rm -rf cd.tmp
+	rm -rf usb.tmp
 
 distclean cleandir: clean
 	rm -rf ${DOWNLOADDIR}
