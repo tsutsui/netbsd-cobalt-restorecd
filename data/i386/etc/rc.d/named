@@ -58,11 +58,11 @@ named_migrate()
 
 named_precmd()
 {
-	if [ \( ! -r /etc/rndc.conf \) -a \( ! -r /etc/rndc.key \) -a \
-	     \( -x /usr/sbin/rndc-confgen \) ]; then
+	if [ \( ! -r /etc/rndc.key \) -a \( ! -r /etc/rndc.conf \) -a \
+	     \( -x /usr/sbin/rndc-confgen \) ]
+	then
 		/usr/sbin/rndc-confgen -a
 	fi
-
 	if [ -z "$named_chrootdir" ]; then
 		return 0;
 	fi

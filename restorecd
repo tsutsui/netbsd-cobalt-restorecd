@@ -230,8 +230,8 @@ prepare_cdroot()
 
 	cd $_rootdir && $cp $basedir/data/common/.cshrc root/
 
-	log "Making /dev entries for init(8)..."
-	cd $_rootdir/dev && $sh ./MAKEDEV init
+#	log "Making /dev entries for init(8)..."
+#	cd $_rootdir/dev && $sh ./MAKEDEV init
 }
 
 #

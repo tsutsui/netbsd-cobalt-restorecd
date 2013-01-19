@@ -141,7 +141,7 @@ create_var_slice()
 	align_size $varsz
 	varsz=$align
 
-	echo " f: $varsz $part_start 4.2BSD 0 0" >> $PTAB
+	echo " f: $varsz $part_start 4.2BSD 1024 8192 64" >> $PTAB
 
 	update_avail $varsz
 }
@@ -162,7 +162,7 @@ create_tmp_slice()
 	align_size $tmpsz
 	tmpsz=$align
 
-	echo " g: $tmpsz $part_start 4.2BSD 0 0" >> $PTAB
+	echo " g: $tmpsz $part_start 4.2BSD 1024 8192 64" >> $PTAB
 
 	update_avail $tmpsz
 }
@@ -171,7 +171,7 @@ create_tmp_slice()
 create_root_slice()
 {
 	# the rest is for the installation
-	echo " a: $disk_avail $part_start 4.2BSD 0 0" >> $PTAB
+	echo " a: $disk_avail $part_start 4.2BSD 1024 8192 64" >> $PTAB
 }
 
 # remove all partition tables
