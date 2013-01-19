@@ -2,15 +2,15 @@ Typical 'restorecd' script invocation:
 
 1. fetch and extract newer restorecd-*.tar.gz
 
-% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071028.tar.gz
+% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071031.tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20071028.tar.gz
+% tar zxf restorecd-20071031.tar.gz
 % cd restorecd
 
 2. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
 
 % rsync -va --files-from=restorecd-fetch.lst \
-    rsync://rsync.netbsd.org/NetBSD-daily/netbsd-4/200710260002Z/ download
+    rsync://rsync.netbsd.org/NetBSD-daily/netbsd-4/200710300002Z/ download
 
 3. fetch and extract e2fsprogs package binary
 
@@ -25,19 +25,7 @@ Typical 'restorecd' script invocation:
 % tar zxf download/source/sets/src.tgz
 % tar zxf download/source/sets/syssrc.tgz
 
-4a. fetch new bootloader binary (until it's pulled up to netbsd-4)
-
-% (cd download; \
-    ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/boot-cobalt-20071028.gz)
-% mkdir usr/mdec
-% zcat download/boot-cobalt-20071028.gz > usr/mdec/boot
-% gunzip download/cobalt/binary/sets/base.tgz
-% tar rf download/cobalt/binary/sets/base.tar ./usr/mdec/boot
-% gzip download/cobalt/binary/sets/base.tar && \
-    mv download/cobalt/binary/sets/base.tar.gz \
-    download/cobalt/binary/sets/base.tgz
-
-4b. fetch patched cobalt GENERIC kernel which recognizes boot device tlp0
+4a. fetch patched cobalt GENERIC kernel which recognizes boot device tlp0
     (until it's pulled up to netbsd-4)
 
 % (cd download; ftp \
@@ -51,14 +39,44 @@ Typical 'restorecd' script invocation:
  % (cd download; ftp \
   http://www.ceres.dti.ne.jp/~tsutsui/netbsd/cobalt-netbootdev-20071028.diff)
  % (cd usr/src; patch -p < ../../download/cobalt-netbootdev-20071028.diff)
- % (cd usr/src; sh build.sh -m cobalt -U -T tooldir tools)
- % (cd usr/src; sh build.sh -m cobalt -T tooldir kernel=GENERIC)
+ % (cd usr/src; sh build.sh -m cobalt -u -U -T tooldir.cobalt tools)
+ % (cd usr/src; sh build.sh -m cobalt -T tooldir.cobalt kernel=GENERIC)
  % gzip -9c usr/src/sys/arch/cobalt/compile/obj/GENERIC/netbsd \
     > download/cobalt/binary/kernel/netbsd-GENERIC.gz
 
+4b. fetch new bootloader binary (until it's pulled up to netbsd-4)
+
+% (cd download; \
+    ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/boot-cobalt-20071031.gz)
+% mkdir usr/mdec
+% zcat download/boot-cobalt-20071031.gz > usr/mdec/boot
+% gunzip download/cobalt/binary/sets/base.tgz
+% tar rf download/cobalt/binary/sets/base.tar ./usr/mdec/boot
+% gzip download/cobalt/binary/sets/base.tar && \
+    mv download/cobalt/binary/sets/base.tar.gz \
+    download/cobalt/binary/sets/base.tgz
+
+ Or if you want to build a new bootloader binary by yourself,
+ use the following patch to build it from sources:
+
+ % (cd download; ftp \
+  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/cobalt-boot-20071031.diff)
+ % (cd usr/src; patch -p < ../../download/cobalt-boot-20071031.diff)
+ % (cd usr/src; sh build.sh -m cobalt -u -U -T tooldir.cobalt tools)
+ % (cd usr/src/sys/arch/cobalt/stand/boot && \
+    ../../../../../tooldir.cobalt/bin/nbmake-cobalt obj && \
+    ../../../../../tooldir.cobalt/bin/nbmake-cobalt dependall )
+ % mkdir usr/mdec
+ % cp usr/src/sys/arch/cobalt/stand/boot/obj/boot usr/mdec
+ % gunzip download/cobalt/binary/sets/base.tgz
+ % tar rf download/cobalt/binary/sets/base.tar ./usr/mdec/boot
+ % gzip download/cobalt/binary/sets/base.tar && \
+     mv download/cobalt/binary/sets/base.tar.gz \
+     download/cobalt/binary/sets/base.tgz
+
 5. build tools to build i386 server's kernel and boot image
 
-% (cd usr/src; sh build.sh -m i386 -U -T tooldir tools)
+% (cd usr/src; sh build.sh -m i386 -u -U -T tooldir.i386 tools)
 
    NOTE1: check your TOOLDIR in the build log here.
    NOTE2: make sure /etc/mk.conf not to override $TOOLDIR
@@ -69,7 +87,7 @@ Typical 'restorecd' script invocation:
 # sh restorecd server=/path/to/restorecd/download \
               client=/path/to/restorecd/download \
               source=/path/to/restorecd/usr/src  \
-              tooldir=/path/to/restorecd/usr/src/tooldir -v
+              tooldir=/path/to/restorecd/usr/src/tooldir.i386 -v
 
    NOTE1: use absolute paths to extracted restorecd dir (otherwise it fails)
-   NOTE2: use your TOOLDIR for tooldir= arg if it isn't .../usr/src/tooldir 
+   NOTE2: use your TOOLDIR for tooldir= arg if it isn't .../usr/src/tooldir.i386 
