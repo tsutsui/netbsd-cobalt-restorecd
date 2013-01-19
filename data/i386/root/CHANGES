@@ -1,3 +1,12 @@
+[20090226] updated 5.0_RC2 with wapbl fixes etc.
+================================
+
+Changes:
+--------
+ - use 200902260000Z netbsd-5 snapshot in Makefile
+ - disable getty at /dev/console in etc/ttys that causes hangup
+   on 2700 without serial
+
 [20090211] 5.0_RC2
 ================================
 

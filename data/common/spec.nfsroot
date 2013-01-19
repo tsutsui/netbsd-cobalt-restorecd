@@ -18,7 +18,7 @@
 ./nfsroot/cobalt/binary/sets/base.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/comp.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/etc.tgz type=file uname=root gname=wheel mode=0644
-./nfsroot/cobalt/binary/sets/games.tgz type=link uname=root gname=wheel mode=0755
+./nfsroot/cobalt/binary/sets/games.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/kern-GENERIC.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/man.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/misc.tgz type=file uname=root gname=wheel mode=0644
@@ -27,7 +27,7 @@
 ./nfsroot/cobalt/binary/sets/xbase.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/xcomp.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/xetc.tgz type=file uname=root gname=wheel mode=0644
-./nfsroot/cobalt/binary/sets/xfont.tgz type=link uname=root gname=wheel mode=0755
+./nfsroot/cobalt/binary/sets/xfont.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/xserver.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/etc/fstab type=file uname=root gname=wheel mode=644
 ./nfsroot/etc/paneld.conf type=file uname=root gname=wheel mode=644
@@ -76,11 +76,3 @@
 ./nfsroot/install/scripts/install-env.sh type=file uname=root gname=wheel mode=0755
 ./nfsroot/install/scripts/install.sh type=file uname=root gname=wheel mode=0755
 ./nfsroot/sbin/newfs_ext2fs type=file uname=root gname=wheel mode=555
-./nfsroot/shared type=dir uname=root gname=wheel mode=0755
-./nfsroot/shared/ALL type=dir uname=root gname=wheel mode=0755
-./nfsroot/shared/ALL/misc.tgz type=file uname=root gname=wheel mode=644
-./nfsroot/shared/mipsel type=dir uname=root gname=wheel mode=0755
-./nfsroot/shared/mipsel/binary type=dir uname=root gname=wheel mode=0755
-./nfsroot/shared/mipsel/binary/sets type=dir uname=root gname=wheel mode=0755
-./nfsroot/shared/mipsel/binary/sets/games.tgz type=file uname=root gname=wheel mode=0644
-./nfsroot/shared/mipsel/binary/sets/xfont.tgz type=file uname=root gname=wheel mode=0644
