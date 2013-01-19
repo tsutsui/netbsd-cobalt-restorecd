@@ -31,7 +31,7 @@ FTP_HOST=	ftp7.jp.NetBSD.org
 #FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD/NetBSD-5.0
 #FTP_DIR?=	pub/NetBSD/NetBSD-5.1
-FTP_DIR?=	pub/NetBSD/NetBSD-5.1.2
+FTP_DIR?=	pub/NetBSD/NetBSD-5.2
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
 # adjuct NCUTDIR by FTP_DIR where you'll get files
@@ -49,7 +49,7 @@ RSYNC_PREFIX?=
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-5/${DAILY_DIR}
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.0
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.1
-RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.1.2
+RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.2
 RSYNC_URL?=	rsync://${RSYNC_HOST}/${RSYNC_DIR}
 
 DOWNLOADDIR=	download
@@ -99,7 +99,6 @@ ${DONE_COBALT_TOOLS}: ${DONE_EXTRACT}
 	${TOUCH} ${DONE_COBALT_TOOLS}
 
 build_cobalt_tools:
-	${PATCH} -d usr/src -p0 < makefs.diff
 	(cd usr/src; \
 	    ${SH} build.sh -m cobalt -u -U \
 	    -T tooldir.cobalt -D destdir.cobalt \
