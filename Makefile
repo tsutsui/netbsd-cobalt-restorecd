@@ -29,7 +29,7 @@ FTP_HOST?=	ftp.NetBSD.org
 #FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD/NetBSD-5.0
-FTP_DIR?=	pub/NetBSD/NetBSD-5.1_RC1
+FTP_DIR?=	pub/NetBSD/NetBSD-5.1_RC2
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
 # adjuct NCUTDIR by FTP_DIR where you'll get files
@@ -46,7 +46,7 @@ RSYNC_PREFIX?=
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/HEAD/${DAILY_DIR}
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-5/${DAILY_DIR}
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.0
-RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.0.2
+RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.1_RC2
 RSYNC_URL?=	rsync://${RSYNC_HOST}/${RSYNC_DIR}
 
 DOWNLOADDIR=	download

@@ -297,7 +297,7 @@ create_cd()
 
 	_bootxx=$_cddir/usr/mdec/bootxx_cd9660
 	"$_makefs" -t cd9660 -F $_specfile -N $_cddir/etc -o \
-	    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot,allow-deep-trees,allow-max-name,allow-multidot \
+	    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot,allow-multidot \
 	    "$_filename".tmp $_cddir && \
 	    mv "$_filename".tmp "$_filename"
 }
