@@ -1,0 +1,193 @@
+diff -ur paneltools.orig/paneld/Makefile paneltools/paneld/Makefile
+--- paneltools.orig/paneld/Makefile	2003-03-04 05:47:08.000000000 +0900
++++ paneltools/paneld/Makefile	2007-11-05 22:00:04.000000000 +0900
+@@ -1,10 +1,16 @@
+ #	from: @(#)Makefile	5.8 (Berkeley) 7/28/90
+ #	$NetBSD$
+ 
++WARNS?=		1
++BINDIR?=	/usr/sbin
++
+ # .if ${MACHINE} == "cobalt"
+ PROG=		paneld
+-# CFLAGS+=	-O0 -g -D_DEBUG -D_USE_HD44780
+-CFLAGS+=	-D_USE_HD44780
++#DBG=		-O0 -g
++#CPPFLAGS+=	-D_DEBUG -D_USE_HD44780
++CPPFLAGS+=	-D_USE_HD44780
++CPPFLAGS+=	-I. -I${.CURDIR}
++CPPFLAGS.hd44780.c+=	-I${NETBSDSRCDIR}/sys -I${NETBSDSRCDIR}/common/include
+ SRCS=		cf-parse.y cf-lex.c paneld.c io.c menu.c window.c
+ SRCS+=		inet_ops.c confirm_ops.c select_ops.c sequence_ops.c
+ SRCS+=		inet6_ops.c none_ops.c exit_ops.c quit_ops.c
+diff -ur paneltools.orig/paneld/cf-lex.c paneltools/paneld/cf-lex.c
+--- paneltools.orig/paneld/cf-lex.c	2007-11-05 21:59:47.000000000 +0900
++++ paneltools/paneld/cf-lex.c	2007-11-05 22:00:04.000000000 +0900
+@@ -28,6 +28,7 @@
+  */
+ 
+ #include <ctype.h>
++#include <err.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+diff -ur paneltools.orig/paneld/cf-parse.y paneltools/paneld/cf-parse.y
+--- paneltools.orig/paneld/cf-parse.y	2007-11-05 21:59:47.000000000 +0900
++++ paneltools/paneld/cf-parse.y	2007-11-05 22:00:04.000000000 +0900
+@@ -30,6 +30,7 @@
+ 
+ #include <err.h>
+ #include <stdio.h>
++#include <string.h>
+ 
+ #include "paneld.h"
+ #include "cf-lex.h"
+diff -ur paneltools.orig/paneld/cons.c paneltools/paneld/cons.c
+--- paneltools.orig/paneld/cons.c	2007-11-05 21:59:47.000000000 +0900
++++ paneltools/paneld/cons.c	2007-11-05 22:00:04.000000000 +0900
+@@ -28,6 +28,7 @@
+  */
+ 
+ #include <stdio.h>
++#include <string.h>
+ 
+ #include "paneld.h"
+ 
+diff -ur paneltools.orig/paneld/device.c paneltools/paneld/device.c
+--- paneltools.orig/paneld/device.c	2003-03-04 07:05:09.000000000 +0900
++++ paneltools/paneld/device.c	2007-11-05 22:00:04.000000000 +0900
+@@ -27,6 +27,8 @@
+  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#include <string.h>
++
+ #include "paneld.h"
+ 
+ static struct {
+diff -ur paneltools.orig/paneld/hd44780.c paneltools/paneld/hd44780.c
+--- paneltools.orig/paneld/hd44780.c	2007-11-05 21:59:47.000000000 +0900
++++ paneltools/paneld/hd44780.c	2007-11-05 22:00:35.000000000 +0900
+@@ -30,13 +30,14 @@
+ #if defined(_USE_HD44780)
+ 
+ #include <fcntl.h>
++#include <string.h>
+ #include <unistd.h>
+ #include <sys/ioctl.h>
+ #include <sys/types.h>
+ #include <sys/poll.h>
+ 
+ #include <dev/ic/hd44780reg.h>
+-#include <dev/ic/hd44780_subr.h>
++#include <dev/ic/hd44780var.h>
+ 
+ #include "paneld.h"
+ 
+diff -ur paneltools.orig/paneld/hex_ops.c paneltools/paneld/hex_ops.c
+--- paneltools.orig/paneld/hex_ops.c	2003-03-04 07:05:17.000000000 +0900
++++ paneltools/paneld/hex_ops.c	2007-11-05 22:00:04.000000000 +0900
+@@ -59,13 +59,14 @@
+ 	}
+ 
+ 	for (i = 0; m->io.buf[i] != 0; i++) {
+-		if (!isdigit(m->io.buf[i])) {
++		if (!isdigit((unsigned char)m->io.buf[i])) {
+ 			if ((m->io.buf[i] >= 'a') &&
+ 					(m->io.buf[i] <= 'f'))
+ 				continue;
+ 			else if ((m->io.buf[i] >= 'A') &&
+ 					(m->io.buf[i] <= 'F'))
+-				m->io.buf[i] = tolower(m->io.buf[i]);
++				m->io.buf[i] =
++				    tolower((unsigned char)m->io.buf[i]);
+ 			else
+ 				return E_IO;
+ 		}
+diff -ur paneltools.orig/paneld/inet6_ops.c paneltools/paneld/inet6_ops.c
+--- paneltools.orig/paneld/inet6_ops.c	2003-03-04 07:05:20.000000000 +0900
++++ paneltools/paneld/inet6_ops.c	2007-11-05 22:00:04.000000000 +0900
+@@ -27,6 +27,7 @@
+  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#include <stdio.h>
+ #include <ctype.h>
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+diff -ur paneltools.orig/paneld/inet_ops.c paneltools/paneld/inet_ops.c
+--- paneltools.orig/paneld/inet_ops.c	2003-03-04 07:05:23.000000000 +0900
++++ paneltools/paneld/inet_ops.c	2007-11-05 22:00:04.000000000 +0900
+@@ -27,6 +27,7 @@
+  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#include <stdio.h>
+ #include <ctype.h>
+ 
+ #include <sys/socket.h>
+diff -ur paneltools.orig/paneld/int_ops.c paneltools/paneld/int_ops.c
+--- paneltools.orig/paneld/int_ops.c	2003-03-04 07:05:26.000000000 +0900
++++ paneltools/paneld/int_ops.c	2007-11-05 22:00:04.000000000 +0900
+@@ -58,7 +58,7 @@
+ 	}
+ 
+ 	for (i = 0; m->io.buf[i] != 0; i++)
+-		if (!isdigit(m->io.buf[i]))
++		if (!isdigit((unsigned char)m->io.buf[i]))
+ 		return E_IO;
+ 
+ 	return E_OK;
+diff -ur paneltools.orig/paneld/menu.c paneltools/paneld/menu.c
+--- paneltools.orig/paneld/menu.c	2007-11-05 21:59:47.000000000 +0900
++++ paneltools/paneld/menu.c	2007-11-05 22:00:04.000000000 +0900
+@@ -29,6 +29,7 @@
+ 
+ #include <sys/utsname.h>
+ 
++#include <stdio.h>
+ #include <unistd.h>
+ #include <malloc.h>
+ #include <string.h>
+diff -ur paneltools.orig/paneld/paneld.conf.5 paneltools/paneld/paneld.conf.5
+--- paneltools.orig/paneld/paneld.conf.5	2007-11-05 21:59:47.000000000 +0900
++++ paneltools/paneld/paneld.conf.5	2007-11-05 22:00:04.000000000 +0900
+@@ -90,10 +90,10 @@
+ .Pp
+ .Bl -item -compact -offset indent
+ .It
+-.Li Sy .xtbl No = {
++.Sy .xtbl No = {
+ .Bl -item -compact -offset indent
+ .It
+-.Li Sy .id No = Qq translation name ;
++.Sy .id No = Qq translation name ;
+ .It
+ .Li <translation statement #1>
+ .It
+@@ -133,10 +133,10 @@
+ .Pp
+ .Bl -item -compact -offset indent
+ .It
+-.Li Sy .xtbl No = {
++.Sy .xtbl No = {
+ .Bl -item -compact -offset indent
+ .It
+-.Li Sy .id No = Qq menu name ;
++.Sy .id No = Qq menu name ;
+ .It
+ .Li <statement #1>
+ .It
+@@ -144,7 +144,11 @@
+ .It
+ .Pp
+ .Li [ Sy .menu No = {
+-.It ...
++.Bl -item -compact -offset indent
++.It
++.Li ...
++.El
++.It
+ .Li } ]
+ .It
+ .Li ...

@@ -105,15 +105,15 @@ A: Please report this to port-cobalt@netbsd.org.  In the meantime, use the
 	bfd /boot/netbsd-INSTALL.gz
 
    - When kernel is booted, login as root, mount /dev/wd0e partition and set
-     up all vmlinux* links to point to netbsd-INSTALL.gz:
+     up all vmlinux* links to point to boot.gz:
 
 	# mount /dev/wd0e /mnt
 	# cd /mnt/boot
 	# rm vmlinux.gz
-	# ln netbsd-INSTALL.gz vmlinux.gz
+	# ln boot.gz vmlinux.gz
 	...
 	# rm vmlinux_raq-2800.gz
-	# ln netbsd-INSTALL.gz vmlinux_raq-2800.gz
+	# ln boot.gz vmlinux_raq-2800.gz
 
 Please report any problems not covered by this section to
 port-cobalt@netbsd.org.

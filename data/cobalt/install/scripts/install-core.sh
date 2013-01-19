@@ -217,7 +217,7 @@ install_boot()
 
 	# Copy boot loader and the kernels as a backup measure
 	$CP /cobalt/binary/kernel/boot.gz /mnt/boot
-	$CP /cobalt/binary/kernel/netbsd-GENERIC.gz /mnt/boot
+	$CP /cobalt/binary/kernel/netbsd-INSTALL.gz /mnt/boot
 
 	cd /mnt/boot
 	for i in $RAQ_KERNELS; do

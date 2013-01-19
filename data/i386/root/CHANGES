@@ -1,3 +1,15 @@
+[20080302] Updates for Qube 2700 and PCI devices
+================================
+
+Fixes:
+------
+
+ - patched 4.0 release kernel which supports Qube 2700 and
+   multi-function PCI devices on Qube's PCI slot
+ - patched native bootloader to support booting on Qube 2700
+ - put some patches and pre-compiled binaries into the archive
+ - install INSTALL kernel into the Linux boot partition for recovery
+ - update instructions.txt to refer our native bootloader
 
 [20080121] More updates for 4.0 Release:
 ================================
