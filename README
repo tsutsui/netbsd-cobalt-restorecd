@@ -2,9 +2,9 @@ Typical 'restorecd' script invocation:
 
 1. fetch and extract newer restorecd-*.tar.gz
 
-% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071106.tar.gz
+% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071108.tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20071106.tar.gz
+% tar zxf restorecd-20071108.tar.gz
 % cd restorecd
 
 2. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
