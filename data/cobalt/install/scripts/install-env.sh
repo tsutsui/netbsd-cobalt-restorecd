@@ -38,6 +38,8 @@ SWAP_DEV=/dev/wd0b
 VAR_DEV=/dev/wd0f
 TMP_DEV=/dev/wd0g
 
+MOUNT_FFS_OPT="-o softdep"
+
 LINUX_PART=131
 LINUX_SWAP=130
 NETBSD_PART=169

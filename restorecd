@@ -215,15 +215,15 @@ prepare_cdroot()
 	log "Creating boot host layout..."
 	do_prepare "$_setsdir" "$_sets" "$_kerndir" "$_kern" "$_rootdir"
 
-	log "Copying i386 boot block..."
+#	log "Copying i386 boot block..."
 	_bootfsdir=i386/installation/floppy
-	_bootfs="$_server/$_bootfsdir/boot-big.fs"
-	[ ! -f "$_bootfs" ] && err 255 "i386 boot block not found."
+#	_bootfs="$_server/$_bootfsdir/boot-big.fs"
+#	[ ! -f "$_bootfs" ] && err 255 "i386 boot block not found."
 
 	_bootfsdir="$_rootdir/$_bootfsdir"
 	$mkdir -p $_bootfsdir ||
 		err 255 "Cannot create '$_bootfsdir' directory."
-	$cp $_bootfs $_bootfsdir
+#	$cp $_bootfs $_bootfsdir
 
 	log "Copying machine dependent bits..."
 	( cd $basedir/data/i386 && tar cpf - * ) | ( cd $_rootdir && tar xpf - )
@@ -236,8 +236,7 @@ prepare_cdroot()
 
 #
 # build_boot_fs <server> <source> <tooldir> <cddir> <kerndir> <bootfsdir>
-#	Unpack released boot-big.fs floppy image and replace default
-#	kernel with customized one.
+#	create bootable floppy image with customized kernel.
 #
 build_boot_fs()
 {

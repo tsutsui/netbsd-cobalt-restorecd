@@ -232,13 +232,13 @@ install_files()
 {
 	printmsg "System install" "Prepare..."
 
-	$MOUNT $ROOT_DEV /mnt
+	$MOUNT $MOUNT_FFS_OPT $ROOT_DEV /mnt
 
 	$MKDIR /mnt/var
-	$MOUNT $VAR_DEV /mnt/var
+	$MOUNT $MOUNT_FFS_OPT $VAR_DEV /mnt/var
 
 	$MKDIR /mnt/tmp
-	$MOUNT $TMP_DEV /mnt/tmp
+	$MOUNT $MOUNT_FFS_OPT $TMP_DEV /mnt/tmp
 
 	cd /mnt
 	for _set in $INST_TARBALLS; do

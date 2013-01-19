@@ -8,9 +8,19 @@ Typical 'restorecd' script invocation:
 % cd restorecd
 
 2. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
+   (use appropriate mirrors)
 
+with rsync:
 % rsync -va --files-from=restorecd-fetch.lst \
     rsync://rsync.netbsd.org/NetBSD-daily/netbsd-4/200710300002Z/ download
+
+with wget:
+% (cd download ; \
+  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-4.0_RC3/ \
+  --no-host-directories --cut-dirs=3 --timestamping --force-directories \
+  --input-file=../restorecd-fetch.lst)
+
+  (NOTE adjuct --cut-dirs=N by which directory you'll get files)
 
 3. fetch and extract e2fsprogs package binary
 
@@ -26,11 +36,11 @@ Typical 'restorecd' script invocation:
 % tar zxf download/source/sets/syssrc.tgz
 
 4a. fetch patched cobalt GENERIC kernel which recognizes boot device tlp0
-    (until it's pulled up to netbsd-4)
+    and LCD fix (until they are pulled up to netbsd-4)
 
 % (cd download; ftp \
-  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/netbsd-GENERIC-cobalt-20071028.gz)
-% cp download/netbsd-GENERIC-cobalt-20071028.gz \
+  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/netbsd-GENERIC-cobalt-20071101.gz)
+% cp download/netbsd-GENERIC-cobalt-20071101.gz \
     download/cobalt/binary/kernel/netbsd-GENERIC.gz
 
  Or if you want to build a GENERIC kernel by yourself (for newer RC),
@@ -38,10 +48,15 @@ Typical 'restorecd' script invocation:
 
  % (cd download; ftp \
   http://www.ceres.dti.ne.jp/~tsutsui/netbsd/cobalt-netbootdev-20071028.diff)
+ % (cd download; ftp \
+  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/cobalt-panel-20071101.diff)
  % (cd usr/src; patch -p < ../../download/cobalt-netbootdev-20071028.diff)
- % (cd usr/src; sh build.sh -m cobalt -u -U -T tooldir.cobalt tools)
- % (cd usr/src; sh build.sh -m cobalt -T tooldir.cobalt kernel=GENERIC)
- % gzip -9c usr/src/sys/arch/cobalt/compile/obj/GENERIC/netbsd \
+ % (cd usr/src; patch -p < ../../download/cobalt-panel-20071101.diff)
+ % (cd usr/src; \
+    sh build.sh -m cobalt -u -U -T tooldir.cobalt -V OBJMACHINE=1 tools)
+ % (cd usr/src; \
+    sh build.sh -m cobalt -T tooldir.cobalt -V OBJMACHINE=1 kernel=GENERIC)
+ % gzip -9c usr/src/sys/arch/cobalt/compile/obj.cobalt/GENERIC/netbsd \
     > download/cobalt/binary/kernel/netbsd-GENERIC.gz
 
 4b. fetch new bootloader binary (until it's pulled up to netbsd-4)
@@ -62,21 +77,59 @@ Typical 'restorecd' script invocation:
  % (cd download; ftp \
   http://www.ceres.dti.ne.jp/~tsutsui/netbsd/cobalt-boot-20071031.diff)
  % (cd usr/src; patch -p < ../../download/cobalt-boot-20071031.diff)
- % (cd usr/src; sh build.sh -m cobalt -u -U -T tooldir.cobalt tools)
+ % (cd usr/src; \
+    sh build.sh -m cobalt -u -U -T tooldir.cobalt -V OBJMACHINE=1 tools)
  % (cd usr/src/sys/arch/cobalt/stand/boot && \
-    ../../../../../tooldir.cobalt/bin/nbmake-cobalt obj && \
+    ../../../../../tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
     ../../../../../tooldir.cobalt/bin/nbmake-cobalt dependall )
  % mkdir usr/mdec
- % cp usr/src/sys/arch/cobalt/stand/boot/obj/boot usr/mdec
+ % cp usr/src/sys/arch/cobalt/stand/boot/obj.cobalt/boot usr/mdec
  % gunzip download/cobalt/binary/sets/base.tgz
  % tar rf download/cobalt/binary/sets/base.tar ./usr/mdec/boot
  % gzip download/cobalt/binary/sets/base.tar && \
      mv download/cobalt/binary/sets/base.tar.gz \
      download/cobalt/binary/sets/base.tgz
 
+4c. rebuild paneld binary (if you don't want to use old precompiled version)
+
+% (cd download; ftp \
+  http://only.mawhrin.net/~cdi/netbsd/cobalt/paneld.tar.gz)
+% (cd download; \
+    ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/paneld-20071101.diff)
+% tar zxf download/paneld.tar.gz
+% patch -p < download/paneld-20071101.diff
+% (cd usr/src; \
+   sh build.sh -m cobalt -u -U -T tooldir.cobalt -D destdir.cobalt \
+   -V OBJMACHINE=1 tools)
+% (cd usr/src; \
+   tooldir.cobalt/bin/nbmake-cobalt do-distrib-dirs)
+% (cd usr/src/destdir.cobalt; \
+    tar zxpf ../../../download/cobalt/binary/sets/base.tgz)
+% (cd usr/src/destdir.cobalt; \
+    tar zxpf ../../../download/cobalt/binary/sets/comp.tgz)
+% (cd paneltools/paneld && \
+   ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
+   ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt dependall)
+% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 555 \
+   paneltools/paneld/obj.cobalt/paneld data/cobalt/install/files/usr/sbin
+% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
+   paneltools/paneld/paneld.conf.5 \
+   data/cobalt/install/files/usr/share/man/man5
+% mkdir data/cobalt/install/files/usr/share/man/cat5
+% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
+   paneltools/paneld/obj.cobalt/paneld.conf.cat5 \
+   data/cobalt/install/files/usr/share/man/cat5/paneld.conf.0
+% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
+   paneltools/paneld/paneld.8 \
+   data/cobalt/install/files/usr/share/man/man8
+% mkdir data/cobalt/install/files/usr/share/man/cat8
+% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
+   paneltools/paneld/obj.cobalt/paneld.cat8 \
+   data/cobalt/install/files/usr/share/man/cat8/paneld.0
+
 5. build tools to build i386 server's kernel and boot image
 
-% (cd usr/src; sh build.sh -m i386 -u -U -T tooldir.i386 tools)
+% (cd usr/src; sh build.sh -m i386 -u -U -T tooldir.i386 -V OBJMACHINE=1 tools)
 
    NOTE1: check your TOOLDIR in the build log here.
    NOTE2: make sure /etc/mk.conf not to override $TOOLDIR
@@ -84,10 +137,10 @@ Typical 'restorecd' script invocation:
 6. execute restorecd script
 
 % su
-# sh restorecd server=/path/to/restorecd/download \
-              client=/path/to/restorecd/download \
-              source=/path/to/restorecd/usr/src  \
-              tooldir=/path/to/restorecd/usr/src/tooldir.i386 -v
+# sh restorecd server=`pwd`/download \
+               client=`pwd`/download \
+               source=`pwd`/usr/src  \
+               tooldir=`pwd`/usr/src/tooldir.i386 -v
 
    NOTE1: use absolute paths to extracted restorecd dir (otherwise it fails)
    NOTE2: use your TOOLDIR for tooldir= arg if it isn't .../usr/src/tooldir.i386 
