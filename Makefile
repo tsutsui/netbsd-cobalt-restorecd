@@ -26,9 +26,10 @@ FTP_HOST?=	ftp.NetBSD.org
 #FTP_HOST=	ftp.jp.NetBSD.org
 #FTP_HOST=	ftp5.jp.NetBSD.org
 
-DAILY_DIR?=	200812020002Z
+DAILY_DIR?=	200901280002Z
 #FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
-FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
+#FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
+FTP_DIR?=	pub/NetBSD-daily/netbsd-5-0-RC1/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD/NetBSD-5.0
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
@@ -44,7 +45,8 @@ RSYNC_PREFIX?=
 #RSYNC_PREFIX=	pub/
 
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/HEAD/${DAILY_DIR}
-RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-5/${DAILY_DIR}
+#RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-5/${DAILY_DIR}
+RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-5-0-RC1/${DAILY_DIR}
 RSYNC_URL?=	rsync://${RSYNC_HOST}/${RSYNC_DIR}
 
 DOWNLOADDIR=	download
