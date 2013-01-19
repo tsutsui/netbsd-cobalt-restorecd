@@ -1,13 +1,15 @@
 Typical 'restorecd' script invocation:
 
-1. fetch and extract newer restorecd-*.tar.gz
+0. fetch and extract newer restorecd-*.tar.gz
 
-% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20080312.tar.gz
+% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20080510.tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20080312.tar.gz
+% tar zxf restorecd-20080510.tar.gz
 % cd restorecd
 
-2. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
+  Then just type "make", or try the following procedure:
+
+1. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
    (use appropriate mirrors)
 
 with rsync:
@@ -22,17 +24,17 @@ with wget:
 
   (NOTE adjuct --cut-dirs=N by which directory you'll get files)
 
-3. extract NetBSD sources
+2. extract NetBSD sources
 
 % tar zxf download/source/sets/gnusrc.tgz
 % tar zxf download/source/sets/sharesrc.tgz
 % tar zxf download/source/sets/src.tgz
 % tar zxf download/source/sets/syssrc.tgz
 
-3a. rebuild paneld(8), backported newfs_ext2fs(8), bug-fixed fdisk(8) binaries
+2a. rebuild paneld(8), backported newfs_ext2fs(8), bug-fixed fdisk(8) binaries
     (if you don't want to use precompiled binaries)
 
-3a-(1) prepare build environment to make cobalt binaries
+2a-(1) prepare build environment to make cobalt binaries
 
 % (cd usr/src; \
    sh build.sh -m cobalt -u -U -T tooldir.cobalt -D destdir.cobalt \
@@ -48,7 +50,7 @@ with wget:
 % (cd usr/src/destdir.cobalt; \
     tar zxpf ../../../download/cobalt/binary/sets/comp.tgz)
 
-3a-(2) build paneld(8) binaries
+2a-(2) build paneld(8) binaries
 
 % (cd download; ftp \
   http://only.mawhrin.net/~cdi/netbsd/cobalt/paneld.tar.gz)
@@ -78,7 +80,7 @@ with wget:
    paneltools/paneld/obj.cobalt/paneld.cat8 \
    data/cobalt/install/files/usr/share/man/cat8/paneld.0
 
-3a-(3) build backported newfs_ext2fs(8)
+2a-(3) build backported newfs_ext2fs(8)
 
 % tar zxf patch/newfs_ext2fs-4.0.tar.gz
 % (cd usr/src/sbin/newfs_ext2fs && \
@@ -97,9 +99,9 @@ with wget:
    usr/src/sbin/newfs_ext2fs/obj.cobalt/newfs_ext2fs.cat8 \
    data/cobalt/install/files/usr/share/man/cat8/newfs_ext2fs.0
 
-3a-(4) build bug-fixed fdisk(8)
+2a-(4) build bug-fixed fdisk(8)
 
-% patch -d < patch/fdisk.c-r1.114.diff
+% patch -p < patch/fdisk.c-r1.114.diff
 % (cd usr/src/sbin/fdisk && \
     ../../../../usr/src/tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
     ../../../../usr/src/tooldir.cobalt/bin/nbmake-cobalt dependall )
@@ -108,9 +110,9 @@ with wget:
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 555 \
    usr/src/sbin/fdisk/obj.cobalt/fdisk data/cobalt/install/files/sbin
 
-4. prepare patched GENERIC kernel and bootloader binaries for cobalt
+3. prepare patched GENERIC kernel and bootloader binaries for cobalt
 
-4a. rebuild GENERIC kernel and native boot.gz if you don't want to use
+3a. rebuild GENERIC kernel and native boot.gz if you don't want to use
     precompiled ones (if you don't mind it you can skip this)
 
 (assuming you have built tools on 3a-(1) already)
@@ -130,7 +132,7 @@ with wget:
     ../../../../../tooldir.cobalt/bin/nbmake-cobalt dependall )
 % cp usr/src/sys/arch/cobalt/stand/boot/obj.cobalt/boot.gz binary/cobalt/
 
-4b. replace binaries in download sets with patched ones
+4. replace binaries in download sets with patched ones
 
 % cp binary/cobalt/netbsd-GENERIC.gz download/cobalt/binary/kernel
 % cp binary/cobalt/netbsd-INSTALL.gz download/cobalt/binary/kernel
@@ -151,8 +153,7 @@ with wget:
 
 6. execute restorecd script
 
-% su
-# sh restorecd server=`pwd`/download \
+% sh restorecd server=`pwd`/download \
                client=`pwd`/download \
                source=`pwd`/usr/src  \
                tooldir=`pwd`/usr/src/tooldir.i386 -v

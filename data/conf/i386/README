@@ -1,3 +1,3 @@
 GENERIC.<version> kernel:
 
- Regular GENERIC kernel without SCSI, RAID, Audio/TV/Radio/Joystick and USB code.
+ Regular GENERIC kernel configured root on cd0a

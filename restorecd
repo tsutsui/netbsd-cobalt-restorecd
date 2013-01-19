@@ -77,6 +77,10 @@ do_prepare()
 		$gzip -cd "$_setsdir/$_set" | ( cd $_dir && $tar xpf - )
 	done
 
+	# XXX hack to avoid permission problem
+	[ -d $_dir/var/spool/ftp/hidden ] &&
+		rmdir $_dir/var/spool/ftp/hidden
+
 	# Unpack installation kernel image
 	[ ! -f "$_kerndir/$_kern" ] &&
 		err 255 "Kernel image '$_kerndir/$_kern' not found."
@@ -104,7 +108,6 @@ prepare_nfsroot()
 	_kernels="vmlinux-nfsroot.gz vmlinux.gz vmlinux_RAQ.gz vmlinux_raq-2800.gz"
 
 	_sets="base.tgz etc.tgz"
-#	_kern="netbsd-INSTALL.gz"
 	_kern="netbsd-GENERIC.gz"
 
 	_setsdir="$_client/cobalt/binary/sets"
@@ -132,14 +135,6 @@ prepare_nfsroot()
 		( cd "$_nfsdir" && tar xpf - )
 
 	log "Fixing up bootstrap code..."
-#	cd "$_nfsdir" && ( $mkdir ./boot && $cp netbsd ./boot/ &&
-#				$gzip -9 ./boot/netbsd )
-#
-#	cd "$_nfsdir/boot" && 
-#		for _kernel in $_kernels; do
-#			$ln -s netbsd.gz $_kernel
-#		done
-#
 	cd "$_nfsdir" && ( $mkdir ./boot &&
 				$gzip -9c ./usr/mdec/boot > ./boot/boot.gz)
 
@@ -151,10 +146,6 @@ prepare_nfsroot()
 	cd "$_nfsdir" && gzip -c9 usr/mdec/boot > cobalt/binary/kernel/boot.gz
 
 	cd "$_nfsdir" && $cp $basedir/data/common/.cshrc root/
-
-	log "Making /dev entries for init(8)..."
-	_initdevs="std wd0 wd1 sd0 sd1 sd2 sd3 cd0 cd1 md0 tty00 panel"
-	cd $_nfsdir/dev && $sh ./MAKEDEV $_initdevs
 }
 
 #
@@ -175,21 +166,19 @@ build_boot_kernel()
 	[ ! -x "$_nbconfig" -o ! -x "$_nbmake" ] &&
 		err 255 "There is no 'nbmake' or 'nbconfig' in tool directory."
 
-	_kernel_in="$_source/sys/arch/i386/conf/GENERIC"
-	_kernel_out="$_builddir/GENERIC.CDROOT"
-	[ ! -f "$_kernel_in" ] &&
-		err 255 "Missing kernel config file '$_kernel_in'."
+	_kernel_generic="$_source/sys/arch/i386/conf/GENERIC"
+	[ ! -f "$_kernel_generic" ] &&
+		err 255 "Missing kernel config file '$_kernel_generic'."
 
 	$rm -rf "$_builddir"
 	$mkdir -p "$_builddir" ||
 		err 255 "Can't create '$_builddir' directory."
 
-	log " + Making kernel config file..."
-	$sed '/^config/d;/SCSI/d' "$_kernel_in" > "$_kernel_out"
-	$cat "$basedir/data/conf/i386/kern.no-conf" >> "$_kernel_out"
+	_kernel_cdroot="$_builddir/GENERIC.CDROOT"
+	$cp "$basedir/data/conf/i386/kern.cdroot" "$_kernel_cdroot"
 
-	log " + Running 'configure' utility..."
-	"$_nbconfig" -s "$_source/sys" -b "$_builddir" "$_kernel_out"
+	log " + Running 'config(1)' utility..."
+	"$_nbconfig" -s "$_source/sys" -b "$_builddir" "$_kernel_cdroot"
 
 	log " + Calculating source dependencies..."
 	cd "$_builddir" && "$_nbmake" depend
@@ -215,87 +204,14 @@ prepare_cdroot()
 	log "Creating boot host layout..."
 	do_prepare "$_setsdir" "$_sets" "$_kerndir" "$_kern" "$_rootdir"
 
-#	log "Copying i386 boot block..."
-	_bootfsdir=i386/installation/floppy
-#	_bootfs="$_server/$_bootfsdir/boot-big.fs"
-#	[ ! -f "$_bootfs" ] && err 255 "i386 boot block not found."
-
 	_bootfsdir="$_rootdir/$_bootfsdir"
 	$mkdir -p $_bootfsdir ||
 		err 255 "Cannot create '$_bootfsdir' directory."
-#	$cp $_bootfs $_bootfsdir
 
 	log "Copying machine dependent bits..."
 	( cd $basedir/data/i386 && tar cpf - * ) | ( cd $_rootdir && tar xpf - )
 
 	cd $_rootdir && $cp $basedir/data/common/.cshrc root/
-
-#	log "Making /dev entries for init(8)..."
-#	cd $_rootdir/dev && $sh ./MAKEDEV init
-}
-
-#
-# build_boot_fs <server> <source> <tooldir> <cddir> <kerndir> <bootfsdir>
-#	create bootable floppy image with customized kernel.
-#
-build_boot_fs()
-{
-	_server="$1"; _source="$2"; _tooldir="$3"; _cddir="$4"; _kerndir="$5"
-	_bootfsdir="$6"
-
-	$rm -rf "$_bootfsdir"
-	$mkdir -p "$_bootfsdir" ||
-		err 255 "Can't create '$_bootfsdir' directory."
-
-#	_bootfs="$_server/i386/installation/floppy/boot-big.fs"
-#	[ ! -f "$_bootfs" ] &&
-#		err 255 "Boot floppy not found, expected '$_bootfs'."
-#
-#	log " + Unpacking release floppy image..."
-#	_bootfs_out="$_bootfsdir/boot-big.fs.tar"
-#	$dd if="$_bootfs" of="$_bootfs_out" bs=8k skip=1
-#	cd "$_bootfsdir" && $tar vxpf "$_bootfs_out"
-#
-	_boot="$_cddir/usr/mdec/boot"
-	[ ! -f "$_boot" ] && err 255 "No '$_boot' found."
-	$cp "$_boot" "$_bootfsdir"
-	$touch "$_bootfsdir/USTAR.volsize.13200"
-
-	log " + Replacing boot kernel..."
-	$gzip -c9 "$_kerndir/netbsd" > "$_bootfsdir/netbsd"
-
-	log " + Building new floppy image..."
-	pax="$_tooldir/bin/nbpax"
-	nbinstallboot="$_tooldir/bin/nbinstallboot"
-	[ ! -x "$pax" -o ! -x "$nbinstallboot" ] &&
-		err 255 "No '$pax' or '$nbinstallboot' in tool directory."
-
-	_bootxx_ustarfs="$_cddir/usr/mdec/bootxx_ustarfs"
-	[ ! -f "$_bootxx_ustarfs" ] && err 255 "No '$_bootxx_ustarfs' found."
-
-	_buildfloppies_sh="$_source/distrib/common/buildfloppies.sh"
-	[ ! -f "$_buildfloppies_sh" ] &&
-		err 255 "'$_buildfloppies_sh' script not found."
-
-	(
-		cd "$_bootfsdir"
-
-		# The following taken out of i386 release build log.
-		# 5760 figure below is the number of 512 byte blocks in
-		# 2880 floppy; 13200 is octal representation of 5760.
-		PAX="$pax" $sh "$_buildfloppies_sh" \
-			-i "$nbinstallboot  -mi386 @IMAGE@ $_bootxx_ustarfs" \
-			-p  -m 1 -s .fs cdboot-big 5760 boot \
-			USTAR.volsize.13200 netbsd
-	)
-
-	log " + Copying out floppy image..."
-	_bootfs_out="$_bootfsdir/cdboot-big1.fs"
-	[ ! -f "$_bootfs_out" ] &&
-		err 255 "'$_bootfs_out' not found, floppy build failed."
-
-	$cp "$_bootfs_out" "$_cddir/i386/installation/floppy/cdboot-big.fs" ||
-		err 255 "Can't copy floppy image."
 }
 
 #
@@ -307,19 +223,20 @@ fix_boot_fs()
 {
 	_server="$1"; _source="$2"; _cddir="$3"; _tooldir="$4"; _tmpdir="$5"
 
-	log "Building boot floppy..."
+	log "Building boot kernel..."
 	build_boot_kernel "$_root_version" "$_source" "$_tooldir" \
 		"$_tmpdir/kern"
 	[ ! -f "$_tmpdir/kern/netbsd" ] &&
 		err 255 " Failed to build server kernel."
-	build_boot_fs "$_server" "$_source" "$_tooldir" "$_cddir"  \
-		"$_tmpdir/kern" "$_tmpdir/cdboot-big.fs"
+
+	$cp $_tmpdir/kern/netbsd $_cddir || err 255 "Can't copy kernel."
+	$cp $_cddir/usr/mdec/boot $_cddir || err 255 "Can't copy bootloader."
 }
 
 #
 # prepare_cddir <server> <client> <cddir> <filename> <source> <tooldir>
 #               <tmpdir>
-#	Prepares CD directory suitable for later use with mkisofs(8).
+#	Prepares CD directory suitable for later use with makefs(8).
 #
 prepare_cddir()
 {
@@ -402,7 +319,6 @@ create_cd()
 		warn "No CD image name supplied, suppress image build."
 		exit 0
 	}
-	[ -z "$mkisofs" ] && err 255 "mkisofs(8) not found."
 
 	[ -f "$_filename" ] && $rm -f "$opt_filename"
 	log "Making ISO image '$_filename'..."
@@ -413,9 +329,15 @@ create_cd()
 			err 255 "Cannot create '$_imagedir' directory."
 	}
 
-	_bootfs=i386/installation/floppy/cdboot-big.fs
-	$mkisofs -o "$_filename" -b $_bootfs -c boot.catalog -l -J -r \
-		-allow-leading-dots "$_cddir"
+	_nbmakefs="$_tooldir/bin/nbmakefs"
+	[ ! -x "$_nbmakefs" ] &&
+		err 255 "There is no 'nbmakefs' in tool directory."
+
+	_bootxx=$_cddir/usr/mdec/bootxx_cd9660
+	"$_nbmakefs" -t cd9660 -o \
+	    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot \
+	    "$_filename".tmp $_cddir && \
+	    mv "$_filename".tmp "$_filename"
 }
 
 #
@@ -473,8 +395,8 @@ get_opts()
 #
 bootstrap()
 {
-	find_tools "rm cp mv ln tar mkdir echo mkisofs dirname pwd basename"
-	find_tools "gzip mknod chmod awk sed dd cat sh touch"
+	find_tools "rm cp mv ln tar mkdir echo dirname pwd basename"
+	find_tools "gzip chmod awk sed dd cat sh touch"
 
 	# Define basedir very early to make it available to the rest of the
 	# script

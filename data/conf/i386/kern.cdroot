@@ -1,0 +1,4 @@
+include		"arch/i386/conf/GENERIC"
+makeoptions	COPTS="-Os"
+no config	netbsd
+config		netbsd	root on cd0a type ?

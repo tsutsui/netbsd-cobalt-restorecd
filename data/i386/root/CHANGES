@@ -1,3 +1,22 @@
+[20080510] Script improvements for easy build
+================================
+
+Improvements:
+-------------
+(Note no changes in cobalt binaries to be installed)
+
+ - prepare dumb Makefile to build restorecd.iso
+   (you still need wget or rsync to get release files)
+ - use makefs(8) which is built from NetBSD toolchain
+   rather than optional mkisofs(8)
+ - use GENERIC like kernel for i386 server with
+   no-emul-boot support on creating bootable CD image
+ - let init(8) create device nodes on netboot cobalt
+   and remove all device nodes from restorecd image
+   so that su(1) root is no longer needed to create image
+ - add a workaround for a permission problem on
+   altvar/spool/ftp/hidden
+
 [20080312] Updates for network hang problem
 ================================
 
