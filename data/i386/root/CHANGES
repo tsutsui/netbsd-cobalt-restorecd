@@ -13,6 +13,7 @@ Bug fixes and improvements:
 
  - Put more details how to create ISO image in README
  - Use usr/mdec/boot directly to create bootable image rather than boot-big.fs
+ - Fix some named(8) configuration
  - Enable softdep on installation
  - Fix fdisk(8) errors on some disk
  - Fix ext2fs partition size

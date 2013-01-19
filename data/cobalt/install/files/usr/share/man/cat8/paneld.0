@@ -1,0 +1,20 @@
+PANELD(8)               NetBSD System Manager's Manual               PANELD(8)
+
+NNAAMMEE
+     ppaanneelldd -- menu daemon for LCD screens
+
+SSYYNNOOPPSSIISS
+     ppaanneelldd [--dd] [--ff _c_o_n_f_f_i_l_e]
+
+DDEESSCCRRIIPPTTIIOONN
+     ppaanneelldd allows to manage device by means of menu displayed on the screen.
+     The daemon merely parses its configuration file, creates menu hierarchy
+     and then executes external commands in response to user interactions.
+
+FFIILLEESS
+     /etc/paneld.conf      paneld(8) configuration file
+
+SSEEEE AALLSSOO
+     paneld.conf(5)
+
+NetBSD 4.0_RC3                   March 2, 2003                  NetBSD 4.0_RC3

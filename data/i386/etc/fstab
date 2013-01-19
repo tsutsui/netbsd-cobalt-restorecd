@@ -1,5 +1,6 @@
 #/etc/fstab
 /dev/cd0a /	cd9660	ro
 swap	/dev	mfs	rw,union,-i=2048,-f=512,-b=4096,-s=1m	0	0
+swap	/etc	mfs	rw,union,-s=1m				0	0
 swap	/var    mfs	rw,-s=2m				0	0
 swap	/tmp    mfs	rw,nodev,noexec,nosuid,-s=1m		0	0
