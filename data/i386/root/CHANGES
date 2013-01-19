@@ -1,3 +1,11 @@
+[20080312] Updates for network hang problem
+================================
+
+Fixes:
+------
+ - add a patch for spl(9) bug which causes on heavy network load
+   on two tulip Ethernet
+
 [20080302] Updates for Qube 2700 and PCI devices
 ================================
 

@@ -2,9 +2,9 @@ Typical 'restorecd' script invocation:
 
 1. fetch and extract newer restorecd-*.tar.gz
 
-% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20080302.tar.gz
+% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20080312.tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20080302.tar.gz
+% tar zxf restorecd-20080312.tar.gz
 % cd restorecd
 
 2. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
@@ -114,7 +114,7 @@ with wget:
     precompiled ones (if you don't mind it you can skip this)
 
 (assuming you have built tools on 3a-(1) already)
-% (cd usr/src; patch -p < ../../patch/cobalt-netbsd-4-20080302.diff)
+% (cd usr/src; patch -p < ../../patch/cobalt-netbsd-4-20080312.diff)
 % (cd usr/src; \
    sh build.sh -m cobalt -u -U -T tooldir.cobalt -D destdir.cobalt \
    -V OBJMACHINE=1 kernel=GENERIC)
