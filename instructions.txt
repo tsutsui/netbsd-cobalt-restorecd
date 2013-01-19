@@ -1,1 +1,1 @@
-data/i386/root/instructions.txt
+data/i386/common/root/instructions.txt

@@ -5,6 +5,7 @@
 ./etc/fstab type=file uname=root gname=wheel mode=0644
 ./etc/namedb/10 type=file uname=root gname=wheel mode=0644
 ./etc/namedb/255 type=file uname=root gname=wheel mode=0644
+./etc/namedb/managed-keys.bind type=file uname=root gname=wheel mode=0644
 ./etc/namedb/netbsd.org type=file uname=root gname=wheel mode=0644
 ./etc/resolv.conf type=file uname=root gname=wheel mode=0644
 ./etc/rc.d/mountmfs type=file uname=root gname=wheel mode=0555
