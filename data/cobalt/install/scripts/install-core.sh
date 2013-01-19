@@ -239,8 +239,6 @@ install_files()
 
 	$MOUNT $MOUNT_FFS_OPT $ROOT_DEV /mnt
 
-	$MKDIR /mnt/kern /mnt/proc /mnt/dev/pts
-
 	$MKDIR /mnt/var
 	$MOUNT $MOUNT_FFS_OPT $VAR_DEV /mnt/var
 
@@ -281,6 +279,9 @@ install_files()
 	cd /
 
 	printmsg "System install" "Finalizing..."
+
+	$MKDIR /mnt/kern /mnt/proc
+	$MKDIR /mnt/ext2
 
 	# Fix permissions
 	$CHMOD 755 /mnt/var

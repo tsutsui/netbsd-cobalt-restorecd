@@ -275,17 +275,20 @@ create_cd()
 
 	_specfile=$_tmpdir/spec
 	_specroot=$_tmpdir/spec.root
-	_specetc=$_tmpdir/spec.etc
 	_specnfsroot=$_tmpdir/spec.nfsroot
-	$rm -f $_specfile $_specroot $_specetc $_specnfsroot
+	$rm -f $_specfile $_specroot $_specnfsroot
 	# /etc/motd will be generated from /etc/motd.tmpl on union mfs
-	$cat $_cddir/etc/mtree/set.base  $_cddir/etc/mtree/set.etc | \
-	    $sed -e 's,^\./etc/motd,\./etc/motd.tmpl,' > $_specetc
 	# /var is mounted as mfs and files will be copied from /altvar
-	$cat $_cddir/etc/mtree/set.base  $_specetc | \
-	    $sed -e 's,^\./var,./altvar,' > $_specroot
-	# use the same permissions on nfsroot for cobalt
-	$cat $_specroot | $sed -e 's,^\./,./nfsroot/,' > $_specnfsroot
+	$cat $_cddir/etc/mtree/set.base \
+	     $_cddir/etc/mtree/set.etc | \
+	     $sed -e 's,^\./etc/motd,\./etc/motd.tmpl,' | \
+	     $sed -e 's,^\./var,./altvar,' > $_specroot
+	$cat $_cddir/nfsroot/etc/mtree/set.base \
+	     $_cddir/nfsroot/etc/mtree/set.etc | \
+	     $sed -e 's,^\./etc/motd,\./etc/motd.tmpl,' | \
+	     $sed -e 's,^\./var,./altvar,' | \
+	     $sed -e 's,^\./,./nfsroot/,' > $_specnfsroot
+	$cat $_cddir/etc/mtree/set.base | \
 	$cat $_specroot $basedir/data/common/spec.root \
 	    $_specnfsroot $basedir/data/common/spec.nfsroot > $_specfile
 

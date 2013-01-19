@@ -1,6 +1,6 @@
 ===============================================================================
 The NetBSD Foundation, Inc.
-NetBSD/cobalt Installation CD [__REL__ Release] [Host OS: NetBSD __HREL__]
+NetBSD/cobalt Installation CD [__REL__] [Host OS: NetBSD __HREL__]
 ===============================================================================
 
 Welcome to the NetBSD/cobalt installation.

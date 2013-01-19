@@ -8,10 +8,10 @@
 # If the console is marked insecure, single-user requires the root password.
 
 # Console pseudo-device
-console	"/usr/libexec/getty std.115200"	vt100	off secure
+console	"/usr/libexec/getty std.115200"	vt100	on secure
 
 # Serial console port
-tty00	"/usr/libexec/getty std.115200"	vt100	on secure
+tty00	"/usr/libexec/getty std.115200"	vt100	off secure
 
 # Pseudo terminals
 ttyp0	none				network	secure

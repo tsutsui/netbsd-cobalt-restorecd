@@ -340,8 +340,10 @@ makedev_main()
 	if $do_create_mfs; then
 		# Count inodes and create mfs file system.
 		# The makedev call merely updates $count_nodes.
-		count_nodes=0
-		$makedev ${1+"$@"}
+		#count_nodes=0
+		#$makedev ${1+"$@"}
+		#create_mfs_dev $count_nodes
+		count_nodes=1024
 		create_mfs_dev $count_nodes
 		unset count_nodes
 	fi
