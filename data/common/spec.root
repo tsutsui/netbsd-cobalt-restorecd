@@ -1,0 +1,6 @@
+. type=dir uname=root gname=wheel mode=0755
+./boot type=file uname=root gname=wheel mode=0444
+./home type=dir uname=root gname=wheel mode=0755
+./netbsd type=file uname=root gname=wheel mode=0755
+./nfsroot type=dir uname=root gname=wheel mode=0755
+./var type=dir uname=root gname=wheel mode=0755

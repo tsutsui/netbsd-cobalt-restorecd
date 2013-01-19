@@ -333,9 +333,20 @@ create_cd()
 	[ ! -x "$_nbmakefs" ] &&
 		err 255 "There is no 'nbmakefs' in tool directory."
 
+	_specfile=$_tmpdir/spec
+	_specroot=$_tmpdir/spec.root
+	_specnfsroot=$_tmpdir/spec.nfsroot
+	$rm -f $_specfile $_specroot $_specnfsroot
+	$cat $_cddir/etc/mtree/set.base  $_cddir/etc/mtree/set.etc | \
+	    $sed -e 's,^\./var,./altvar,' > $_specroot
+	$cat ${_specfile}.root | \
+	    $sed -e 's,^\./,./nfsroot/,' >> $_specnfsroot
+	$cat $basedir/data/common/spec.root $_specroot \
+	    $_specnfsroot $basedir/data/common/spec.etc > $_specfile
+
 	_bootxx=$_cddir/usr/mdec/bootxx_cd9660
-	"$_nbmakefs" -t cd9660 -o \
-	    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot \
+	"$_nbmakefs" -t cd9660 -F $_specfile -o \
+	    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot,allow-deep-trees,allow-max-name,allow-multidot \
 	    "$_filename".tmp $_cddir && \
 	    mv "$_filename".tmp "$_filename"
 }
