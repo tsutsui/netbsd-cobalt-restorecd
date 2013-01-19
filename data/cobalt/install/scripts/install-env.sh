@@ -38,7 +38,7 @@ SWAP_DEV=/dev/wd0b
 VAR_DEV=/dev/wd0f
 TMP_DEV=/dev/wd0g
 
-MOUNT_FFS_OPT="-o softdep"
+MOUNT_FFS_OPT="-o async"
 
 LINUX_PART=131
 LINUX_SWAP=130

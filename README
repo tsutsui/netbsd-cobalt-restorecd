@@ -2,9 +2,9 @@ Typical 'restorecd' script invocation:
 
 1. fetch and extract newer restorecd-*.tar.gz
 
-% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071031.tar.gz
+% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071106.tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20071031.tar.gz
+% tar zxf restorecd-20071106.tar.gz
 % cd restorecd
 
 2. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
@@ -12,11 +12,11 @@ Typical 'restorecd' script invocation:
 
 with rsync:
 % rsync -va --files-from=restorecd-fetch.lst \
-    rsync://rsync.netbsd.org/NetBSD-daily/netbsd-4/200710300002Z/ download
+    rsync://rsync.NetBSD.org/NetBSD/NetBSD-4.0_RC4/ download
 
 with wget:
 % (cd download ; \
-  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-4.0_RC3/ \
+  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-4.0_RC4/ \
   --no-host-directories --cut-dirs=3 --timestamping --force-directories \
   --input-file=../restorecd-fetch.lst)
 
@@ -35,62 +35,7 @@ with wget:
 % tar zxf download/source/sets/src.tgz
 % tar zxf download/source/sets/syssrc.tgz
 
-4a. fetch patched cobalt GENERIC kernel which recognizes boot device tlp0
-    and LCD fix (until they are pulled up to netbsd-4)
-
-% (cd download; ftp \
-  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/netbsd-GENERIC-cobalt-20071101.gz)
-% cp download/netbsd-GENERIC-cobalt-20071101.gz \
-    download/cobalt/binary/kernel/netbsd-GENERIC.gz
-
- Or if you want to build a GENERIC kernel by yourself (for newer RC),
- use the following patch to build it from sources:
-
- % (cd download; ftp \
-  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/cobalt-netbootdev-20071028.diff)
- % (cd download; ftp \
-  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/cobalt-panel-20071101.diff)
- % (cd usr/src; patch -p < ../../download/cobalt-netbootdev-20071028.diff)
- % (cd usr/src; patch -p < ../../download/cobalt-panel-20071101.diff)
- % (cd usr/src; \
-    sh build.sh -m cobalt -u -U -T tooldir.cobalt -V OBJMACHINE=1 tools)
- % (cd usr/src; \
-    sh build.sh -m cobalt -T tooldir.cobalt -V OBJMACHINE=1 kernel=GENERIC)
- % gzip -9c usr/src/sys/arch/cobalt/compile/obj.cobalt/GENERIC/netbsd \
-    > download/cobalt/binary/kernel/netbsd-GENERIC.gz
-
-4b. fetch new bootloader binary (until it's pulled up to netbsd-4)
-
-% (cd download; \
-    ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/boot-cobalt-20071031.gz)
-% mkdir usr/mdec
-% zcat download/boot-cobalt-20071031.gz > usr/mdec/boot
-% gunzip download/cobalt/binary/sets/base.tgz
-% tar rf download/cobalt/binary/sets/base.tar ./usr/mdec/boot
-% gzip download/cobalt/binary/sets/base.tar && \
-    mv download/cobalt/binary/sets/base.tar.gz \
-    download/cobalt/binary/sets/base.tgz
-
- Or if you want to build a new bootloader binary by yourself,
- use the following patch to build it from sources:
-
- % (cd download; ftp \
-  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/cobalt-boot-20071031.diff)
- % (cd usr/src; patch -p < ../../download/cobalt-boot-20071031.diff)
- % (cd usr/src; \
-    sh build.sh -m cobalt -u -U -T tooldir.cobalt -V OBJMACHINE=1 tools)
- % (cd usr/src/sys/arch/cobalt/stand/boot && \
-    ../../../../../tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
-    ../../../../../tooldir.cobalt/bin/nbmake-cobalt dependall )
- % mkdir usr/mdec
- % cp usr/src/sys/arch/cobalt/stand/boot/obj.cobalt/boot usr/mdec
- % gunzip download/cobalt/binary/sets/base.tgz
- % tar rf download/cobalt/binary/sets/base.tar ./usr/mdec/boot
- % gzip download/cobalt/binary/sets/base.tar && \
-     mv download/cobalt/binary/sets/base.tar.gz \
-     download/cobalt/binary/sets/base.tgz
-
-4c. rebuild paneld binary (if you don't want to use old precompiled version)
+4a. rebuild paneld binary (if you don't want to use a precompiled binary)
 
 % (cd download; ftp \
   http://only.mawhrin.net/~cdi/netbsd/cobalt/paneld.tar.gz)
@@ -147,3 +92,4 @@ with wget:
 
    NOTE1: use absolute paths to extracted restorecd dir (otherwise it fails)
    NOTE2: use your TOOLDIR for tooldir= arg if it isn't .../usr/src/tooldir.i386 
+  Now you have an iso image in cd.tmp dir.

@@ -251,7 +251,7 @@ install_files()
 
 	printmsg "System install" "Create /dev/*"
 	if [ -d /mnt/dev ]; then
-		cd /mnt/dev && ./MAKEDEV all panel
+		cd /mnt/dev && ./MAKEDEV all
 	else
 		printmsg "WARNING" "No /mnt/dev"
 	fi

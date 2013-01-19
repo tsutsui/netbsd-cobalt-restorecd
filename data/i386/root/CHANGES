@@ -1,11 +1,11 @@
 
-[20071105] More changes to 4.0 Release:
+[20071106] More changes to 4.0 Release:
 ================================
 
 New Features:
 -------------
 
- - 4.0_RC3 kernel and userland
+ - 4.0_RC4 kernel and userland
  - New netboot capable native bootloader and use GENERIC kernel on bootstrap
 
 Bug fixes and improvements:
@@ -14,10 +14,12 @@ Bug fixes and improvements:
  - Put more details how to create ISO image in README
  - Use usr/mdec/boot directly to create bootable image rather than boot-big.fs
  - Fix some named(8) configuration
- - Enable softdep on installation
+ - Use async mount during installation
+ - Enable softdep on fstab
+ - Remove unneeded mke2fs binaries
  - Fix fdisk(8) errors on some disk
  - Fix ext2fs partition size
- - Paneld: Fix several warnings (use WARNS=1)
+ - Paneld: Fix several warnings (enable WARNS=1)
  - Paneld: Recompile with 4.0_RC3 userland on cross environment
 
 [20060323] Changes to 4.0 Release:

@@ -153,7 +153,8 @@ prepare_nfsroot()
 	cd "$_nfsdir" && $cp $basedir/data/common/.cshrc root/
 
 	log "Making /dev entries for init(8)..."
-	cd $_nfsdir/dev && $sh ./MAKEDEV init
+	_initdevs="std wd0 wd1 sd0 sd1 sd2 sd3 cd0 cd1 md0 tty00 panel"
+	cd $_nfsdir/dev && $sh ./MAKEDEV $_initdevs
 }
 
 #
@@ -178,7 +179,6 @@ build_boot_kernel()
 	_kernel_out="$_builddir/GENERIC.CDROOT"
 	[ ! -f "$_kernel_in" ] &&
 		err 255 "Missing kernel config file '$_kernel_in'."
-	$cp "$_kernel_in" "$_kernel_out"
 
 	$rm -rf "$_builddir"
 	$mkdir -p "$_builddir" ||
