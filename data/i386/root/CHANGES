@@ -1,3 +1,11 @@
+[20080910] 4.99.72 current snapshot
+================================
+
+Changes:
+--------
+ - use 200809100002Z daily snapshot
+ - disable postfix(8) on i386 server
+
 [20080511] Script improvements for easy build
 ================================
 

@@ -1,0 +1,299 @@
+diff -Nau paneld.orig/cf-lex.c paneld/cf-lex.c
+--- paneld.orig/cf-lex.c	2003-03-03 14:04:54.000000000 -0800
++++ paneld/cf-lex.c	2003-11-30 15:44:32.000000000 -0800
+@@ -127,39 +127,40 @@
+ 		const char *nm;
+ 		int tok;
+ 	} keymap[] = {
+-		{ "id",         TK_MENUID   },
+-		{ "menu",	TK_MENU     },
+-		{ "xtbl",	TK_XTBL     },
+-		{ "xlate",	TK_XLATE    },
+-		{ "inc",        TK_INC      },
+-		{ "dec",	TK_DEC      },
+-		{ "next",	TK_NEXT     },
+-		{ "prev",	TK_PREV     },
+-		{ "enter",	TK_ENTER    },
+-		{ "title",	TK_TITLE    },
+-		{ "write",	TK_WRITE    },
+-		{ "read",	TK_READ     },
+-		{ "int",	TK_INT      },
+-		{ "hex",	TK_HEX      },
+-		{ "inet",	TK_INET     },
+-		{ "inet6",	TK_INET6    },
+-		{ "text",	TK_TEXT     },
+-		{ "resist",	TK_RESIST   },
+-		{ "repeat",	TK_REPEAT   },
+-		{ "keyrate",	TK_KEYRATE  },
+-		{ "banner",	TK_BANNER   },
+-		{ "start",	TK_START    },
+-		{ "devname",	TK_DEVNAME  },
+-		{ "devnode",	TK_DEVNODE  },
+-		{ "exit",	TK_EXIT     },
+-		{ "quit",	TK_QUIT     },
+-		{ "none",	TK_NONE     },
+-		{ "type",	TK_TYPE     },
+-		{ "leaf",	TK_LEAF     },
+-		{ "confirm",	TK_CONFIRM  },
+-		{ "select",	TK_SELECT   },
+-		{ "sequence",	TK_SEQUENCE },
+-		{ NULL,		0           }
++		{ "id",         	TK_MENUID	},
++		{ "menu",		TK_MENU		},
++		{ "xtbl",		TK_XTBL		},
++		{ "xlate",		TK_XLATE	},
++		{ "inc",        	TK_INC		},
++		{ "dec",		TK_DEC		},
++		{ "next",		TK_NEXT		},
++		{ "prev",		TK_PREV		},
++		{ "enter",		TK_ENTER	},
++		{ "title",		TK_TITLE	},
++		{ "write",		TK_WRITE	},
++		{ "read",		TK_READ		},
++		{ "int",		TK_INT		},
++		{ "hex",		TK_HEX		},
++		{ "inet",		TK_INET		},
++		{ "inet6",		TK_INET6	},
++		{ "text",		TK_TEXT		},
++		{ "resist",		TK_RESIST	},
++		{ "repeat",		TK_REPEAT	},
++		{ "keyrate",		TK_KEYRATE	},
++		{ "banner",		TK_BANNER	},
++		{ "bannerrate",		TK_BANNERRATE	},
++		{ "start",		TK_START	},
++		{ "devname",		TK_DEVNAME	},
++		{ "devnode",		TK_DEVNODE	},
++		{ "exit",		TK_EXIT		},
++		{ "quit",		TK_QUIT		},
++		{ "none",		TK_NONE		},
++		{ "type",		TK_TYPE		},
++		{ "leaf",		TK_LEAF		},
++		{ "confirm",		TK_CONFIRM	},
++		{ "select",		TK_SELECT	},
++		{ "sequence",		TK_SEQUENCE	},
++		{ NULL,			0		}
+ 	};
+ 
+ 	for (i = 0; keymap[i].nm != NULL; i++) {
+diff -Nau paneld.orig/cf-parse.y paneld/cf-parse.y
+--- paneld.orig/cf-parse.y	2003-03-03 14:05:00.000000000 -0800
++++ paneld/cf-parse.y	2003-11-30 18:06:02.000000000 -0800
+@@ -74,7 +74,7 @@
+ %token	TK_DEVNAME TK_DEVNODE TK_EXIT TK_QUIT TK_TYPE TK_LEAF
+ %token	TK_SELECT TK_SEQUENCE TK_CONFIRM TK_MENUID
+ %token	TK_NONE TK_XLATE TK_INC TK_DEC TK_NEXT TK_PREV TK_ENTER
+-%token	TK_XTBL TK_BANNER TK_KEYRATE
++%token	TK_XTBL TK_BANNER TK_BANNERRATE TK_KEYRATE
+ 
+ %%
+ file:
+@@ -134,6 +134,7 @@
+ 	| global keyrate_expr
+ 	| global device_expr
+ 	| global banner_expr
++	| global banner_rate_expr
+ 	| global start_expr
+ 	;
+ 
+@@ -291,6 +292,13 @@
+ 		}
+ 	;
+ 
++banner_rate_expr:
++	TK_BANNERRATE '=' TK_INTEGER
++		{
++			globals->banner_rate = $3;
++		}
++	;
++
+ start_expr:
+ 	TK_START '=' TK_CHAR
+ 		{ globals->x_enter = $3; }
+@@ -519,4 +527,7 @@
+ 	yylex_init(cfile);
+ 	(void)yyparse();
+ 	yylex_fini();
++
++	if (globals->banner_rate <= 0)
++		globals->banner_rate = -1;
+ }
+diff -Nau paneld.orig/cons.c paneld/cons.c
+--- paneld.orig/cons.c	2003-03-03 14:05:06.000000000 -0800
++++ paneld/cons.c	2003-11-30 15:49:34.000000000 -0800
+@@ -161,7 +161,7 @@
+ }
+ 
+ static int
+-cons_getchr(int *c)
++cons_getchr(int *c, int timeout)
+ {
+ 	int _c = getchar();
+ 	getchar(); /* skip eol */
+diff -Nau paneld.orig/hd44780.c paneld/hd44780.c
+--- paneld.orig/hd44780.c	2003-03-03 14:05:15.000000000 -0800
++++ paneld/hd44780.c	2003-11-30 15:45:53.000000000 -0800
+@@ -32,6 +32,8 @@
+ #include <fcntl.h>
+ #include <unistd.h>
+ #include <sys/ioctl.h>
++#include <sys/types.h>
++#include <sys/poll.h>
+ 
+ #include <dev/ic/hd44780reg.h>
+ #include <dev/ic/hd44780_subr.h>
+@@ -171,9 +173,16 @@
+ }
+ 
+ static int
+-hd44780_getchr(int *c)
++hd44780_getchr(int *c, int timeout)
+ {
+ 	u_int8_t buf;
++	struct pollfd fds[1];
++
++	fds[0].fd = fd;
++	fds[0].events = POLLIN | POLLERR;
++	if (poll(fds, 1, timeout) == 0)
++		return E_TIMEOUT;
++
+ 	if (read(fd, &buf, sizeof(buf)) != sizeof(buf))
+ 		return E_IO;
+ 	*c = buf;
+diff -Nau paneld.orig/menu.c paneld/menu.c
+--- paneld.orig/menu.c	2003-03-03 14:05:31.000000000 -0800
++++ paneld/menu.c	2003-11-30 16:21:26.000000000 -0800
+@@ -56,7 +56,7 @@
+ 		int xk;
+ 		int key;
+ 
+-		if (scankey(&globals->devcap, 0, &key) != E_OK)
++		if (scankey(&globals->devcap, 0, &key, -1) != E_OK)
+ 			return E_IO;
+ 
+ 		switch( (xk = menu_xlate(m, key))) {
+@@ -183,7 +183,14 @@
+ 		display_banner();
+ 		for (;;) {
+ 			int c;
+-			if (scankey(&globals->devcap, 1, &c) == E_OK) {
++			int ret;
++
++			ret = scankey(&globals->devcap, 1, &c,
++				      globals->banner_rate);
++
++			if (ret == E_TIMEOUT)
++				display_banner();
++			else if (ret == E_OK) {
+ 				if (c == globals->x_enter)
+ 					break;
+ 			}
+diff -Nau paneld.orig/paneld.conf.5 paneld/paneld.conf.5
+--- paneld.orig/paneld.conf.5	2003-03-02 14:18:46.000000000 -0800
++++ paneld/paneld.conf.5	2003-11-30 18:20:04.000000000 -0800
+@@ -73,6 +73,10 @@
+ Sets the main screen contents. The daemon executes an external command
+ specified in this statement and displays its output on the screen. If command
+ fails or the statement is not specified, operating system name is displayed.
++.It Sy .bannerrate No = num
++Sets the time (in milliseconds) that the daemon will wait between executions of
++the command specified with the ".banner" directive.  The default is 0, which
++means only execute the command once.
+ .It Sy .devname No = Qq name
+ Symbolic device name, e.g. "hd44780".
+ .It Sy .devnode No = Qq node
+diff -Nau paneld.orig/paneld.h paneld/paneld.h
+--- paneld.orig/paneld.h	2003-03-03 14:05:45.000000000 -0800
++++ paneld/paneld.h	2003-11-30 18:07:38.000000000 -0800
+@@ -46,6 +46,8 @@
+ #define E_EXIT		0x8
+ #define E_QUIT		0x9
+ 
++#define E_TIMEOUT	0xA
++
+ struct menu;
+ struct lcd_devcap;
+ 
+@@ -65,7 +67,7 @@
+ 	int	(* setpos)(int x, int y);
+ 	int	(* cursor)(int on, int blink);
+ 
+-	int	(* getchr)(int *c);
++	int	(* getchr)(int *c, int timeout);
+ };
+ 
+ /* editor operations */
+@@ -139,7 +141,8 @@
+ 
+ 	char *banner_cmd;
+ 	char **banner_args;
+-
++	int banner_rate;
++	
+ 	char *dev_name;
+ 	char *dev_node;
+ 
+@@ -202,7 +205,7 @@
+ int	run_menu(void);
+ int	enter_menu(struct menu *m);
+ void	cf_parse(const char *cfile);
+-int	scankey(struct lcd_devcap *cap, int do_resist, int *key);
++int	scankey(struct lcd_devcap *cap, int do_resist, int *key, int timeout);
+ 
+ /* lcd initialization */
+ struct lcd_window*	get_window(void);
+diff -Nau paneld.orig/scankey.c paneld/scankey.c
+--- paneld.orig/scankey.c	2003-03-03 14:06:01.000000000 -0800
++++ paneld/scankey.c	2003-11-30 16:00:26.000000000 -0800
+@@ -60,7 +60,7 @@
+  *  - Ignore input if its generated too fast for the user
+  */
+ int
+-scankey(struct lcd_devcap *cap, int do_resist, int *key)
++scankey(struct lcd_devcap *cap, int do_resist, int *key, int timeout)
+ {
+ 	int c;
+ 
+@@ -71,28 +71,39 @@
+ 	long waittime = do_resist ? cap->resist : cap->repeat;
+ 
+ 	if ((cap->capabilities & DEV_CAP_AUTOREPEAT) == 0)
+-		return dev->getchr(key);
++		return dev->getchr(key, timeout);
+ 
+ 	if (gettimeofday(&tv_after, &tz) == -1)
+ 		return E_IO;
+ 
+ 	for (;;) {
++		int ret;
++		int delta;
++		
+ 		tv_before = tv_after;
+-		if (dev->getchr(&c) != E_OK)
++		ret = dev->getchr(&c, timeout);
++		if (ret == E_TIMEOUT)
++			return E_TIMEOUT;
++		else if (ret != E_OK)
+ 			return E_IO;
+ 		if (gettimeofday(&tv_after, &tz) == -1)
+ 			return E_IO;
+-		if (timediff(&tv_before, &tv_after) > cap->keyrate) {
++		delta = timediff(&tv_before, &tv_after);
++		if (delta > cap->keyrate) {
+ 			/* button was not pressed all the time, reset */
+ 			if (do_resist) {
+ 				waittime = cap->resist;
++				if (timeout > delta)
++					timeout -= delta;
++				else
++					timeout = 0;
+ 				continue;
+ 			}
+ 			tv_last = tv_after;
+ 			break;
+ 		}
+ 
+-		waittime -= timediff(&tv_before, &tv_after);
++		waittime -= delta;
+ 		if (waittime <= 0) {
+ 			tv_last = tv_after;
+ 			break;
