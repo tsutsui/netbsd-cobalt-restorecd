@@ -1,13 +1,19 @@
 
-[20071224] Minor updates for official 4.0 Release:
+[20080121] More updates for 4.0 Release:
 ================================
+
+New Features:
+-------------
+
+ - 4.0 release kernel and userland
+ - newfs_ext2fs(8) binary backported from -current instead of Linux mke2fs
 
 Fixes:
 ------
 
- - 4.0 release kernel and userland
  - update README for 4.0
  - paneld binaries recompiled on 4.0 environment
+ - patched fdisk(8) binary to avoid "Trace/BPT trap" failure
  - add symlinks to CHANGES and instructions.txt
 
 [20071106] More changes to 4.0 Release:

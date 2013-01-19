@@ -1,0 +1,188 @@
+NEWFS_EXT2FS(8)         NetBSD System Manager's Manual         NEWFS_EXT2FS(8)
+
+NNAAMMEE
+     nneewwffss__eexxtt22ffss -- construct a new Ext2 file system
+
+SSYYNNOOPPSSIISS
+     nneewwffss__eexxtt22ffss [--FFIINNZZ] [--bb _b_l_o_c_k_-_s_i_z_e] [--ff _f_r_a_g_-_s_i_z_e] [--ii _b_y_t_e_s_-_p_e_r_-_i_n_o_d_e]
+                  [--mm _f_r_e_e_-_s_p_a_c_e] [--nn _i_n_o_d_e_s] [--OO _f_i_l_e_s_y_s_t_e_m_-_f_o_r_m_a_t]
+                  [--SS _s_e_c_t_o_r_-_s_i_z_e] [--ss _s_i_z_e] [--VV _v_e_r_b_o_s_e] [--vv _v_o_l_n_a_m_e] _s_p_e_c_i_a_l
+
+DDEESSCCRRIIPPTTIIOONN
+     nneewwffss__eexxtt22ffss is used to initialize and clear Ext2 file systems before
+     first use.  Before running nneewwffss__eexxtt22ffss the disk must be labeled using
+     disklabel(8).  nneewwffss__eexxtt22ffss builds a file system on the specified special
+     device basing its defaults on the information in the disk label.  Typi-
+     cally the defaults are reasonable, however nneewwffss__eexxtt22ffss has numerous
+     options to allow the defaults to be selectively overridden.
+
+     Options with numeric arguments may contain an optional (case-insensitive)
+     suffix:
+           b    Bytes; causes no modification.  (Default)
+           k    Kilo; multiply the argument by 1024
+           m    Mega; multiply the argument by 1048576
+           g    Giga; multiply the argument by 1073741824
+
+     The following options define the general layout policies.
+
+     --bb _b_l_o_c_k_-_s_i_z_e
+                 The block size of the file system, in bytes.  It must be a
+                 power of two.  The smallest allowable size is 1024 bytes.
+                 The default size depends upon the size of the file system:
+
+                       ffiillee ssyysstteemm ssiizzee  _b_l_o_c_k_-_s_i_z_e
+                       <= 512 MB         1 KB
+                       > 512 MB          4 KB
+
+     --FF          Create a file system image in _s_p_e_c_i_a_l.  The file system size
+                 needs to be specified with ``--ss _s_i_z_e''.  No attempts to use
+                 or update the disk label will be made.
+
+     --ff _f_r_a_g_-_s_i_z_e
+                 The fragment size of the file system in bytes.  It must be
+                 the same with blocksize because current ext2fs implementation
+                 doesn't support fragmentation.
+
+     --II          Do not require that the file system type listed in the disk
+                 label is `Linux Ext2'.
+
+     --ii _b_y_t_e_s_-_p_e_r_-_i_n_o_d_e
+                 This specifies the density of inodes in the file system.  If
+                 fewer inodes are desired, a larger number should be used; to
+                 create more inodes a smaller number should be given.
+
+     --mm _f_r_e_e_-_s_p_a_c_e
+                 The percentage of space reserved from normal users; the mini-
+                 mum free space threshold.  The default value used is 5%.
+
+     --NN          Causes the file system parameters to be printed out without
+                 really creating the file system.
+
+     --nn _i_n_o_d_e_s   This specifies the number of inodes for the file system.  If
+                 both --ii and --nn are specified then --nn takes precedence.  The
+                 default number of inodes is calculated from a number of
+                 blocks in the file system.
+
+     --OO _f_i_l_e_s_y_s_t_e_m_-_f_o_r_m_a_t
+                 Select the filesystem-format
+                       0    `GOOD_OLD_REV'; This option is primarily used to
+                            build root file systems that can be understood by
+                            old or dumb firmwares for bootstrap. (default)
+                       1    `DYNAMIC_REV'; Various extended (and sometimes
+                            incompatible) features are enabled (though not all
+                            features are supported on NetBSD).  Currently only
+                            the following features are supported:
+                                  RESIZE       Prepare some reserved struc-
+                                               tures which enable future file
+                                               system resizing.
+                                  FTYPE        Store file types in directory
+                                               entries to improve performance.
+                                  SPARSESUPER  Prepare superblock backups for
+                                               the fsck_ext2fs(8) utility on
+                                               not all but sparse block
+                                               groups.
+                                  LARGEFILE    Enable files larger than 2G
+                                               bytes.
+
+     --ss _s_i_z_e     The size of the file system in sectors.  An `s' suffix will
+                 be interpreted as the number of sectors (the default).  All
+                 other suffixes are interpreted as per other numeric argu-
+                 ments, except that the number is converted into sectors by
+                 dividing by the sector size (as specified by --SS _s_e_c_s_i_z_e)
+                 after suffix interpretation.
+
+                 If no --ss _s_i_z_e is specified then the filesystem size defaults
+                 to that of the partition, or, if --FF is specified, the exist-
+                 ing file.
+
+                 If _s_i_z_e is negative the specified size is subtracted from the
+                 default size (reserving space at the end of the partition).
+
+     --vv _v_o_l_n_a_m_e  This specifies a volume name for the file system.
+
+     --VV _v_e_r_b_o_s_e  This controls the amount of information written to stdout:
+                       0    No output
+                       1    Overall size and cylinder group details.
+                       2    A progress bar (dots ending at right hand margin).
+                       3    The first few super-block backup sector numbers
+                            are displayed before the progress bar.
+                       4    All the super-block backup sector numbers are dis-
+                            played (no progress bar).
+                 The default is 3.  If --NN is specifed nneewwffss__eexxtt22ffss stops
+                 before outputting the progress bar.
+
+     --ZZ          Pre-zeros the file system image created with --FF.  This is
+                 necessary if the image is to be used by vnd(4) (which doesn't
+                 support file systems with `holes').
+
+     The following option overrides the standard sizes for the disk geometry.
+     The default value is taken from the disk label.  Changing this default is
+     useful only when using nneewwffss__eexxtt22ffss to build a file system whose raw
+     image will eventually be used on a different type of disk than the one on
+     which it is initially created (for example on a write-once disk).  Note
+     that changing this value from its default will make it impossible for
+     fsck_ext2fs(8) to find the alternative superblocks if the standard
+     superblock is lost.
+
+     --SS _s_e_c_t_o_r_-_s_i_z_e
+                 The size of a sector in bytes (almost never anything but
+                 512).  Defaults to 512.
+
+NNOOTTEESS
+     There is no option to specify the metadata byte order on the file system
+     to be created because native Ext2 file system is always little endian
+     even on big endian hosts.
+
+     The file system is created with `random' inode generation numbers to
+     improve NFS security.
+
+     The owner and group ids of the root node and reserved blocks of the new
+     file system are set to the effective uid and gid of the user initializing
+     the file system.
+
+     For the nneewwffss__eexxtt22ffss command to succeed, the disk label should first be
+     updated such that the fstype field for the partition is set to `Linux
+     Ext2', unless --FF or --II is used.
+
+     The partition size is found using fstat(2) not by inspecting the diskla-
+     bel.  The block size and fragment size will be written back to the
+     disklabel only if the last character of _s_p_e_c_i_a_l references the same par-
+     tition as the minor device number.  that provide disk like block and
+     character devices.
+
+SSEEEE AALLSSOO
+     fstat(2), disklabel(5), disktab(5), fs(5), disklabel(8), diskpart(8),
+     fsck_ext2fs(8), mount(8), mount_ext2fs(8), newfs(8),
+
+           hhttttpp::////ee22ffsspprrooggss..ssoouurrcceeffoorrggee..nneett//eexxtt22iinnttrroo..hhttmmll
+     Remy Card, Theodore Ts'o, and Stephen Tweedie, "Design and Implementation
+     of the Second Extended Filesystem", _T_h_e _P_r_o_c_e_e_d_i_n_g_s _o_f _t_h_e _F_i_r_s_t _D_u_t_c_h
+     _I_n_t_e_r_n_a_t_i_o_n_a_l _S_y_m_p_o_s_i_u_m _o_n _L_i_n_u_x.
+
+HHIISSTTOORRYY
+     The nneewwffss__eexxtt22ffss command first appeared in NetBSD 5.0.
+
+AAUUTTHHOORRSS
+     The nneewwffss__eexxtt22ffss command was written by Izumi Tsutsui
+     <tsutsui@NetBSD.org>.
+
+BBUUGGSS
+     The nneewwffss__eexxtt22ffss command is still experimental and there are few sanity
+     checks.
+
+     The nneewwffss__eexxtt22ffss command doesn't have options to specify each REV1 file
+     system feature independently.
+
+     The nneewwffss__eexxtt22ffss command doesn't support the bad block list accounted by
+     the bad blocks inode.
+
+     Many newer Ext2 file system features (especially journaling) are not sup-
+     ported yet.
+
+     Some features in file systems created by the nneewwffss__eexxtt22ffss command might
+     not be recognized properly by the fsck_ext2fs(8) utility.
+
+     There is no native tool in the NetBSD distribution for resizing Ext2 file
+     systems yet.
+
+NetBSD 4.0                     November 17, 2007                    NetBSD 4.0

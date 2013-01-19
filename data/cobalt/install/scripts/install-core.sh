@@ -196,7 +196,7 @@ install_disklabel()
 init_filesystems()
 {
 	printmsg "Disk Setup" "Format boot"
-	$MKE2FS -r 0 -O none -m 0 $ALTROOT_DEV
+	$NEWFS_EXT2FS -O 0 $ALTROOT_DEV
 
 	printmsg "Disk Setup" "Format /var"
 	$NEWFS $VAR_DEV
