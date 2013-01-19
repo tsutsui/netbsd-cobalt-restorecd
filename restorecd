@@ -149,8 +149,6 @@ prepare_nfsroot()
 		for _kernel in $_kernels; do
 			$ln -s boot.gz $_kernel
 		done
-
-	cd "$_nfsdir" && $cp $basedir/data/common/.cshrc root/
 }
 
 #
@@ -178,7 +176,6 @@ prepare_cdroot()
 	( cd $basedir/data/i386 && tar cpf - * ) | ( cd $_rootdir && tar xpf - )
 
 	$cp $_cddir/usr/mdec/boot $_cddir || err 255 "Can't copy bootloader."
-	cd $_rootdir && $cp $basedir/data/common/.cshrc root/
 }
 
 #
@@ -279,13 +276,15 @@ create_cd()
 	# /var is mounted as mfs and files will be copied from /altvar
 	$cat $_cddir/etc/mtree/set.base \
 	     $_cddir/etc/mtree/set.etc | \
-	     $sed -e 's,^\./etc/motd,\./etc/motd.tmpl,' | \
-	     $sed -e 's,^\./var,./altvar,' > $_specroot
+	     $sed -e 's,^\./etc/motd,\./etc/motd.tmpl,' \
+	          -e 's,^\./var,./altvar,' \
+	          -e 's/ size=[0-9]*//' > $_specroot
 	$cat $_cddir/nfsroot/etc/mtree/set.base \
 	     $_cddir/nfsroot/etc/mtree/set.etc | \
-	     $sed -e 's,^\./etc/motd,\./etc/motd.tmpl,' | \
-	     $sed -e 's,^\./var,./altvar,' | \
-	     $sed -e 's,^\./,./nfsroot/,' > $_specnfsroot
+	     $sed -e 's,^\./etc/motd,\./etc/motd.tmpl,' \
+	          -e 's,^\./var,./altvar,' \
+	          -e 's,^\./,./nfsroot/,' \
+	          -e 's/ size=[0-9]*//' > $_specnfsroot
 	$cat $_cddir/etc/mtree/set.base | \
 	$cat $_specroot $basedir/data/common/spec.root \
 	    $_specnfsroot $basedir/data/common/spec.nfsroot > $_specfile

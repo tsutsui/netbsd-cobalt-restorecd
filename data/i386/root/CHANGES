@@ -1,3 +1,13 @@
+[20090818] Welcome to 5.0.1
+================================
+
+Changes:
+--------
+ - use NetBSD 5.0.1 release binaries
+ - remove unused and obsolete .cshrc in data/common
+ - remove unnecessary 'size=N' field (which has been added after 5.0)
+   from spec file for mtree(8) to create ISO image with patched files
+
 [20090430] Welcome to 5.0
 ================================
 
