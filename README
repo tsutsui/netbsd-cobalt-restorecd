@@ -2,7 +2,7 @@ Typical 'restorecd' script invocation:
 
 0. fetch and extract newer restorecd-*.tar.gz
 
-% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20080912.tar.gz
+% ftp ftp://ftp.NetBSD.org/pub/NetBSD/misc/cobalt/restorecd/4.99.72/restorecd-20081008.tar.gz
     (or from appropriate server)
 % tar zxf restorecd-20080912.tar.gz
 % cd restorecd
@@ -18,11 +18,11 @@ Typical 'restorecd' script invocation:
 
 with rsync:
 % rsync -va --files-from=restorecd-fetch.lst \
-    rsync://rsync.NetBSD.org/NetBSD-daily/HEAD/20080910002Z download
+    rsync://rsync.NetBSD.org/NetBSD-daily/HEAD/20081006002Z download
 
 with wget:
 % (cd download ; \
-  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD-daily/HEAD/200809100002Z/ \
+  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD-daily/HEAD/200810060002Z/ \
   --no-host-directories --cut-dirs=3 --timestamping --force-directories \
   --input-file=../restorecd-fetch.lst)
 

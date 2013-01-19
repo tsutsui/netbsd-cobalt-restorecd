@@ -287,7 +287,6 @@ install_files()
 do_reboot()
 {
 	printmsg "Installed OK" "Rebooting..."
-	$UMOUNT -a
 	$REBOOT
 }
 

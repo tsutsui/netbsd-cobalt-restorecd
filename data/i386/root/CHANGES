@@ -1,3 +1,15 @@
+[20081008] 4.99.72 -current snapshot update
+================================
+
+Changes:
+--------
+ - use 200801006002Z daily snapshot in Makefile
+  - MI mfs unmount bug (PR kern/39307) has been fixed
+    so remove a workaround for it
+ - bump /var size and use /etc/services from 4.0 release for i386 server
+   because stripped version for installation doesn't have telnet lines
+   and -current one is too large
+
 [20080912] 4.99.72 -current snapshot
 ================================
 
