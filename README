@@ -1,0 +1,75 @@
+Typical 'restorecd' script invocation:
+
+1. fetch and extract newer restorecd-*.tar.gz
+
+% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071028.tar.gz
+    (or from appropriate server)
+% tar zxf restorecd-20071028.tar.gz
+% cd restorecd
+
+2. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
+
+% rsync -va --files-from=restorecd-fetch.lst \
+    rsync://rsync.netbsd.org/NetBSD-daily/netbsd-4/200710260002Z/ download
+
+3. fetch and extract e2fsprogs package binary
+
+% (cd download ; \
+    ftp ftp://ftp.NetBSD.org/pub/pkgsrc/packages/NetBSD/mipsel/3.0_2006Q4/sysutils/e2fsprogs-1.32.tgz)
+% tar -C data/cobalt/usr/pkg -zxf download/e2fsprogs-1.32.tgz sbin/mke2fs
+
+4. extract NetBSD sources
+
+% tar zxf download/source/sets/gnusrc.tgz
+% tar zxf download/source/sets/sharesrc.tgz
+% tar zxf download/source/sets/src.tgz
+% tar zxf download/source/sets/syssrc.tgz
+
+4a. fetch new bootloader binary (until it's pulled up to netbsd-4)
+
+% (cd download; \
+    ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/boot-cobalt-20071028.gz)
+% mkdir usr/mdec
+% zcat download/boot-cobalt-20071028.gz > usr/mdec/boot
+% gunzip download/cobalt/binary/sets/base.tgz
+% tar rf download/cobalt/binary/sets/base.tar ./usr/mdec/boot
+% gzip download/cobalt/binary/sets/base.tar && \
+    mv download/cobalt/binary/sets/base.tar.gz \
+    download/cobalt/binary/sets/base.tgz
+
+4b. fetch patched cobalt GENERIC kernel which recognizes boot device tlp0
+    (until it's pulled up to netbsd-4)
+
+% (cd download; ftp \
+  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/netbsd-GENERIC-cobalt-20071028.gz)
+% cp download/netbsd-GENERIC-cobalt-20071028.gz \
+    download/cobalt/binary/kernel/netbsd-GENERIC.gz
+
+ Or if you want to build a GENERIC kernel by yourself (for newer RC),
+ use the following patch to build it from sources:
+
+ % (cd download; ftp \
+  http://www.ceres.dti.ne.jp/~tsutsui/netbsd/cobalt-netbootdev-20071028.diff)
+ % (cd usr/src; patch -p < ../../download/cobalt-netbootdev-20071028.diff)
+ % (cd usr/src; sh build.sh -m cobalt -U -T tooldir tools)
+ % (cd usr/src; sh build.sh -m cobalt -T tooldir kernel=GENERIC)
+ % gzip -9c usr/src/sys/arch/cobalt/compile/obj/GENERIC/netbsd \
+    > download/cobalt/binary/kernel/netbsd-GENERIC.gz
+
+5. build tools to build i386 server's kernel and boot image
+
+% (cd usr/src; sh build.sh -m i386 -U -T tooldir tools)
+
+   NOTE1: check your TOOLDIR in the build log here.
+   NOTE2: make sure /etc/mk.conf not to override $TOOLDIR
+
+6. execute restorecd script
+
+% su
+# sh restorecd server=/path/to/restorecd/download \
+              client=/path/to/restorecd/download \
+              source=/path/to/restorecd/usr/src  \
+              tooldir=/path/to/restorecd/usr/src/tooldir -v
+
+   NOTE1: use absolute paths to extracted restorecd dir (otherwise it fails)
+   NOTE2: use your TOOLDIR for tooldir= arg if it isn't .../usr/src/tooldir 

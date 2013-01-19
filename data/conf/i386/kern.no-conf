@@ -1,0 +1,120 @@
+makeoptions 	COPTS="-Os"
+no options 	INCLUDE_CONFIG_FILE	# embed config file in kernel binary
+
+# CPU-related options.
+no options 	VM86		# virtual 8086 emulation
+no options 	USER_LDT	# user-settable LDT; used by WINE
+
+no options 	KTRACE		# system call tracing via ktrace(1)
+
+no options 	LKM		# loadable kernel modules
+
+no options 	USERCONF	# userconf(4) support
+no options 	SYSCTL_INCLUDE_DESCR	# Include sysctl descriptions in kernel
+
+no options 	COMPAT_OSSAUDIO	# OSS (Voxware) audio driver compatibility
+no options 	COMPAT_SVR4	# binary compatibility with SVR4
+no options 	COMPAT_IBCS2	# binary compatibility with SCO and ISC
+no options 	COMPAT_LINUX	# binary compatibility with Linux
+no options 	COMPAT_FREEBSD	# binary compatibility with FreeBSD
+no options 	COMPAT_BSDPTY	# /dev/[pt]ty?? ptys.
+
+# File systems
+no file-system 	EXT2FS		# second extended file system (linux)
+no file-system 	LFS		# log-structured file system
+no file-system 	NTFS		# Windows/NT file system (experimental)
+no file-system 	FDESC		# /dev/fd
+no file-system 	KERNFS		# /kern
+no file-system 	NULLFS		# loopback file system
+no file-system 	OVERLAY		# overlay file system
+no file-system 	PORTAL		# portal filesystem (still experimental)
+no file-system 	PROCFS		# /proc
+no file-system 	UMAPFS		# NULLFS + uid and gid remapping
+no file-system	CODA		# Coda File System; also needs vcoda (below)
+no file-system	SMBFS		# experimental - CIFS; also needs nsmb (below)
+no file-system	PTYFS		# /dev/ptm support
+no file-system	TMPFS		# experimental - OSTA UDF CD/DVD file-system
+
+# File system options
+no options 	QUOTA		# UFS quotas
+no options 	SOFTDEP		# FFS soft updates support.
+
+# Networking options
+no options 	NETATALK	# AppleTalk networking protocols
+no options 	PPP_BSDCOMP	# BSD-Compress compression support for PPP
+no options 	PPP_DEFLATE	# Deflate compression support for PPP
+no options 	PPP_FILTER	# Active filter support for PPP (requires bpf)
+no options 	PFIL_HOOKS	# pfil(9) packet filter hooks
+no options 	IPFILTER_LOG	# ipmon(8) log support
+
+# These options enable verbose messages for several subsystems.
+# Warning, these may compile large string tables into the kernel!
+no options 	EISAVERBOSE	# verbose EISA device autoconfig messages
+no options 	MIIVERBOSE	# verbose PHY autoconfig messages
+no options 	PCIVERBOSE	# verbose PCI device autoconfig messages
+#no options 	SCSIVERBOSE	# human readable SCSI error messages
+no options 	USBVERBOSE	# verbose USB device autoconfig messages
+no options 	I2OVERBOSE	# verbose I2O driver messages
+no options 	MCAVERBOSE	# verbose MCA device autoconfig messages
+
+# Kernel root file system and dump configuration.
+config		netbsd	root on cd0a type ?
+
+# Disable ACPI
+no acpi0 at mainbus0
+no ioapic* at mainbus?
+
+# Pseudo-Devices
+
+no pseudo-device 	crypto		# /dev/crypto device
+no pseudo-device	swcrypto	# software crypto implementation
+
+# disk/mass storage pseudo-devices
+no pseudo-device	ccd			# concatenated/striped disk devices
+no pseudo-device	raid			# RAIDframe disk driver
+no options 	RAID_AUTOCONFIG		# auto-configuration of RAID components
+no pseudo-device	fss			# file system snapshot device
+
+no pseudo-device	md			# memory disk device (ramdisk)
+no pseudo-device	vnd			# disk-like interface to files
+no options 	VND_COMPRESSION		# compressed vnd(4)
+
+# network pseudo-devices
+no pseudo-device	ipfilter	# IP filter (firewall) and NAT
+no pseudo-device	ppp		# Point-to-Point Protocol
+no pseudo-device	pppoe		# PPP over Ethernet (RFC 2516)
+no pseudo-device	sl		# Serial Line IP
+no pseudo-device	strip		# Starmode Radio IP (Metricom)
+no pseudo-device	irframetty	# IrDA frame line discipline
+no pseudo-device	tap		# virtual Ethernet
+no pseudo-device	tun		# network tunneling over tty
+no pseudo-device	gre		# generic L3 over IP tunnel
+no pseudo-device	gif		# IPv[46] over IPv[46] tunnel (RFC1933)
+no pseudo-device	stf		# 6to4 IPv6 over IPv4 encapsulation
+no pseudo-device	vlan		# IEEE 802.1q encapsulation
+no pseudo-device	bridge		# simple inter-network bridging
+no pseudo-device	agr		# IEEE 802.3ad link aggregation
+
+# miscellaneous pseudo-devices
+no pseudo-device	pty			# pseudo-terminals
+no pseudo-device	sequencer		# MIDI sequencer
+no pseudo-device	clockctl		# user control of clock subsystem
+
+# a pseudo device needed for Coda	# also needs CODA (above)
+no pseudo-device	vcoda			# coda minicache <-> venus comm.
+
+# a pseudo device needed for SMBFS
+no pseudo-device	nsmb			# experimental - SMB requester
+no pseudo-device	ksyms			# /dev/ksyms
+
+no options 	FILEASSOC		# fileassoc(9) - required for Veriexec
+
+# Veriexec
+no pseudo-device	veriexec
+no options VERIFIED_EXEC_FP_RMD160
+no options VERIFIED_EXEC_FP_SHA256
+no options VERIFIED_EXEC_FP_SHA384
+no options VERIFIED_EXEC_FP_SHA512
+no options VERIFIED_EXEC_FP_SHA1
+no options VERIFIED_EXEC_FP_MD5
+

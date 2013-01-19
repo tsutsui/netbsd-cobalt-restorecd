@@ -1,0 +1,151 @@
+===============================================================================
+The NetBSD Foundation, Inc.
+NetBSD/cobalt Installation CD [__REL__ Release] [Host OS: NetBSD __HREL__]
+===============================================================================
+
+Welcome to the NetBSD/cobalt installation.
+
+This file is brought to you by 'less', press <space> to read more.
+
+===========================
+Minimum System Requirements
+===========================
+
+Intel-Compatible PC Desktop or Laptop with
+
+ - IDE (ATAPI) or SCSI CD-ROM
+ - At least one network card
+
+Computer MUST be CD-ROM-bootable.
+
+========================
+Installation Limitations
+========================
+
+Please note that this restore CD is targetted at Cobalt MIPS-based appliances
+and clones (e.g. Gateway Microserver).  Intel-based server appliances cannot
+be installed using this CD-ROM.
+
+=========================
+Installation Instructions
+=========================
+
+Warning: THIS INSTALLATION WILL DESTROY THE EXISTING CONTENTS OF THE SERVER
+APPLIANCE'S HARD DRIVE.  Ensure you have sufficient backups before starting
+the installation.
+
+1.	Connect this computer to the server appliance using either a crossover
+	cable or hub/switch.
+
+2.	Turn on the server appliance while simultaneously pressing and holding
+	down both the left (<) and right (>) arrow buttons on the LCD console.
+
+3.	Continue holding down both the left (<) and right (>) arrow buttons
+	until "Net Booting" appears on the LCD display, then release the
+	buttons.
+
+4.	Wait until the box reboots.  Finally, the box host name and IP address
+	should appear on the LCD screen.  This indicates installation success.
+
+Warning: Please note that the installation process may take a while.  Do not
+interrupt it until it is finished.
+
+Warning: A freshly installed box is configured as a DHCP client i.e. it tries
+to obtain its IP address over the network from a DHCP server.  To disable
+this, change /etc/rc.conf to contain "dhclient=NO" line.
+
+5.	BE AWARE that a newly installed box is left in a highly insecure state.
+	All ttys are open by default and allow root access over the network.
+	Also, telnet and rlogin ports are open.  This is done to allow you
+	to login into the fresh box in order to make necessary configuration
+	changes.  Please do not forget to bring your box to a secure state.
+
+6.	type 'man afterboot' and start reading :)  Some of the information is
+	not applicable to the cobalt architecture, but will give you some
+	background information on configuring NetBSD in general.
+
+This file is permanently available as /root/instructions.txt on this restore
+CD.
+
+===========================
+Monitoring the Installation
+===========================
+
+If your appliance has a serial port and you want to use it to monitor the
+installation (or to login after installation has finished), connect a PC or
+terminal to the serial port and configure as 115200 8N1.
+
+===============
+Troubleshooting
+===============
+
+Q: Installation seems to go smoothly, but after reboot I am seeing
+
+	"Jump_to_Real_Kernel: disk error, trying BFD again"
+
+A: This may be a problem with the hard drive configuration. Here is
+   an advice from debian-mips list:
+
+   Check the jumpers on your hard drive.  The jumper on my Qube's hard
+   drive had settings for "Primary" and for "Only disk in the chain".  I
+   had it set to "primary" which let me install things, but wouldn't
+   boot.  I had to put it on "Only disk" to get a boot.  This cost me
+   three days :(
+
+Q: Installation was ok, but the boot loader doesn't seem to boot a kernel
+
+A: Please report this to port-cobalt@netbsd.org.  In the meantime, use the
+   following workaround:
+
+   - Connect a PC or terminal to the appliance's serial port (115200 8N1)
+   - Reboot or power-cycle the box
+   - When Cobalt's banner "We serve it, you surf it" appears, hit space bar
+   - In PROM console, type
+
+	bfd /boot/netbsd-INSTALL.gz
+
+   - When kernel is booted, login as root, mount /dev/wd0e partition and set
+     up all vmlinux* links to point to netbsd-INSTALL.gz:
+
+	# mount /dev/wd0e /mnt
+	# cd /mnt/boot
+	# rm vmlinux.gz
+	# ln netbsd-INSTALL.gz vmlinux.gz
+	...
+	# rm vmlinux_raq-2800.gz
+	# ln netbsd-INSTALL.gz vmlinux_raq-2800.gz
+
+Please report any problems not covered by this section to
+port-cobalt@netbsd.org.
+
+===================
+Further Information
+===================
+
+NetBSD home page
+	http://www.netbsd.org/
+
+NetBSD/cobalt port page
+	http://www.netbsd.org/Ports/cobalt/
+
+NetBSD/cobalt FAQ
+	http://www.netbsd.org/Ports/cobalt/faq.html
+
+general instructions on configuring a fresh NetBSD install
+	man afterboot
+
+detailed description of Cobalt boot process
+	man boot
+
+=======
+Credits
+=======
+
+Cobalt Networks, Inc. -- first and foremost, for the idea of this installation.
+Beside of the idea, many configuration files were taken out of the original
+Cobalt OS Restore CD and modified to work with NetBSD.
+
+NetBSD Cobalt users -- for testing and many useful suggestions. Without you,
+this work would have never been done!
+
+Alex Pelts -- for the excellent instructions on how to create a restore CD.

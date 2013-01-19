@@ -1,0 +1,25 @@
+;
+; BIND reverse data file for netbsd.org domain
+;
+$TTL	604800
+@	IN	SOA	bootserver.netbsd.org. netbsd.org. (
+		     2000080801		; Serial
+			 604800		; Refresh
+			  86400		; Retry
+			2419200		; Expire
+			 604800 )	; Negative Cache TTL
+;
+		NS	bootserver.netbsd.org.
+254.0.0		PTR	bootserver.netbsd.org.
+
+150.0.0		PTR	q-150.netbsd.org.
+151.0.0		PTR	q-151.netbsd.org.
+152.0.0		PTR	q-152.netbsd.org.
+153.0.0		PTR	q-153.netbsd.org.
+154.0.0		PTR	q-154.netbsd.org.
+155.0.0		PTR	q-155.netbsd.org.
+156.0.0		PTR	q-156.netbsd.org.
+157.0.0		PTR	q-157.netbsd.org.
+158.0.0		PTR	q-158.netbsd.org.
+159.0.0		PTR	q-159.netbsd.org.
+160.0.0		PTR	q-160.netbsd.org.

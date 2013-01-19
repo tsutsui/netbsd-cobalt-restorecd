@@ -1,0 +1,415 @@
+.\" $NetBSD$
+.\"
+.\" Copyright (c) 2003 Dennis I. Chernoivanov
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.Dd March 1, 2003
+.Dt PANELD.CONF 5
+.Os
+.Sh NAME
+.Nm paneld.conf
+.Nd
+.Xr paneld 8
+configuration file
+.Sh DESCRIPTION
+The
+.Nm
+file is the configuration file for the
+.Xr paneld 8
+program, the LCD menu daemon.
+.Pp
+The file essentially consists of a list of statements. There are three
+different kinds of statements, one to set various parameters, one to describe
+the menu hierarchy and one to translate device input into action categories
+that are understood by the daemon. Each statement that does not describe
+input translation or menu hierarchy must end with semi-colon.
+.Sh GLOBAL PARAMETERS
+The global parameters specify the basic daemon behavior, such as greeting
+message, key rate and so on. The following statements are available:
+.Bl -tag -width parameterwidth -offset indent
+.It Sy .start No = 'c'
+Specifies a character that the device is expected to generate in order to
+enter the main menu. Normally, it is assumed that the device has one or
+more buttons each of which generates a special character code.
+.It Sy .repeat No = num
+Sets the time interval, in microseconds, for the auto-repeat feature. If the
+button is hold longer than specified in this statement the new key event
+will be generated.
+.It Sy .keyrate No = num
+Device poll rate, in microseconds. The same as 1 / (maximum number of button
+events per second).
+.It Sy .resist No = num
+If set, specifies the number of microseconds to hold the button before the
+main menu is entered.
+.It Sy .banner No = Qq command
+Sets the main screen contents. The daemon executes an external command
+specified in this statement and displays its output on the screen. If command
+fails or the statement is not specified, operating system name is displayed.
+.It Sy .bannerrate No = num
+Sets the time (in milliseconds) that the daemon will wait between executions of
+the command specified with the ".banner" directive.  The default is 0, which
+means only execute the command once.
+.It Sy .devname No = Qq name
+Symbolic device name, e.g. "hd44780".
+.It Sy .devnode No = Qq node
+LCD device file, e.g. /dev/panel.
+.El
+.Sh TRANSLATION TABLES
+The next set of statements is used to set the translation between device
+input and daemon actions. The translation is described by
+.Em translation table
+of the following syntax:
+.Pp
+.Bl -item -compact -offset indent
+.It
+.Li Sy .xtbl No = {
+.Bl -item -compact -offset indent
+.It
+.Li Sy .id No = Qq translation name ;
+.It
+.Li <translation statement #1>
+.It
+.Li ...
+.El
+.Li }
+.El
+.Pp
+.Em Translation name
+is use in the menu statements to ..... . The following translation statements
+may appear in the translation table:
+.Bl -tag -width parameterwidth -offset indent
+.It Sy .next No = 'c'
+Proceed to the next menu item or to the next position in the text
+.It Sy .prev No = 'c'
+Proceed to the previous menu item or to the previous position in the text
+.It Sy .inc No = 'c'
+Increment the character at the current cursor position (edit mode only)
+.It Sy .dec No = 'c'
+Decrement the character at the current cursor position (edit mode only)
+.It Sy .enter No = 'c'
+Select current menu for execution or accept edited text
+.El
+Translation table may not contain all of the statements described above. If the
+statement is omitted, the corresponding event will never occur in the menu that
+uses such translation table.
+.Sh MENU DESCRIPTIONS
+This is the most important part of the configuration file as it describes the
+whole daemon behavior from the users viewpoint. The current configuration
+syntax allows to describe a tree of menus, each of which can be configured to
+perform on of the well-defined actions including text editing, menu browsing an
+so on.  In this section, menus that are defined inside a menu description  are
+said to be
+.Em childs
+of thei respective parent. The syntax of menu statement is akin to that of the
+translation table, but different statements can be used inside:
+.Pp
+.Bl -item -compact -offset indent
+.It
+.Li Sy .xtbl No = {
+.Bl -item -compact -offset indent
+.It
+.Li Sy .id No = Qq menu name ;
+.It
+.Li <statement #1>
+.It
+.Li <statement #2>
+.It
+.Pp
+.Li [ Sy .menu No = {
+.It ...
+.Li } ]
+.It
+.Li ...
+.El
+.Li }
+.El
+.Pp
+The following statements are allowed in menu descriptions:
+.Pp
+.Bl -tag -width parameterwidth -offset indent
+.It Sy .id No = Qq string
+Menu identifier that may be referred in a
+.Em read
+or
+.Em write
+parameter. See also
+.Em sequence
+description.
+.It Sy .title No = Qq string
+Menu title, a string that will be displayed on the screen when browsing. This
+statement can be omitted in menu descriptions of type
+.Em none
+,
+.Em quit
+and
+.Em exit
+.It Sy .xlate No = Qq string
+Device input translation. Must name one of the translation tables defined in
+the configuration file. Omitting this parameter will essentialy make a menu
+ignorant to a user input.
+.It Sy .type No = keyword
+This parameter defines the menu behavior. The possible types are:
+.Bl -tag -width parameterwidth
+.It Sy inet
+Editor for ipv4-style addresses
+.It Sy inet6
+Editor for ipv6-style addresses
+.It Sy text No [num]
+Editor for a text field of
+.Em num
+length. All leading and trailing whitspaces are stripped
+.It Sy int No [num]
+Editor for a decimal integer of
+.Em num
+digits. All leading zeroes are stripped out of the output
+.It Sy hex No [num]
+Editor for a hexadecimal integer of
+.Em num
+digits. All leading zeroes are stripped out of the output
+.It Sy .select
+Menu browser. Allows user to choose one of its child menus
+.It Sy .sequence
+Guides user through a sequence of menus.
+.It Sy .confirm
+Provides a simple confirmation dialog. If user chooses "Yes",
+.Em write
+action, if specified, is executed. Also, if there are children menus the menu
+with idetifier "true" will be enter if user chooses "Yes", and menu with
+identifier "false" will be entered if user chooses "No".
+.It Sy .exit
+Returns the control to the oughter
+.Em select
+menu
+.It Sy .quit
+Instructs the daemon to terminate
+.It Sy .none
+Forces menu to exit with a positive status
+.It Sy .read No = Qq string
+Read menu string. Parameter
+.Em string
+specifies an external command (and its parameters) that daemon will start before
+menu will take over the control flow. The external command's output will be used
+as a menu content, i.e. it will be displayed on the screen. This feature is
+intended only for editing purposes, so its use is limited to the menu
+descriptions of types
+.Em inet
+,
+.Em inet6
+and
+.Em text
+.It Sy .write No = Qq string
+Read menu string. Parameter
+.Em string
+specifies an external command (and its parameters) that daemon will start after
+menu finishes its execution. The main intention of this option is to provide a
+way to save menu content, possibly edited by a user. The
+.Em string
+argument specifies an external command and its parameters. If paramter starts
+with
+.Sq $
+sign, the following token will be treated as menu identifier, and the content of
+this menu will be used as a parameter. This allows to combine output of multiple
+menus to be processed by a single command. (Note: External command parameters may
+refer only to the menus that are have a direct parent of type
+.Em sequence
+and that preceed the referencee in the declaration order.) The
+.Em write
+statement can appear in menu description of type
+.Em inet
+,
+.Em inet6
+,
+.Em confirm
+,
+.Em text
+and
+.Em none
+.El
+.El
+.Sh FILES
+.Bl -tag -width /etc/syslog.conf -compact
+.It Pa /etc/paneld.conf
+The
+.Xr paneld 8
+configuration file.
+.El
+.Sh EXAMPLES
+A configuration file might appear as follows:
+.Bd -literal
+# Enter menu when device generates character 'S'
+\&.start='S';
+
+# Require user to press the button for at least 1/2 seconds
+\&.resist=500000;
+
+# Generate auto-repeat event if button is pressed for more
+# that 1/2 seconds
+\&.repeat=500000;
+
+# If button is hold down, device will generate a new event each
+# 1/3 seconds
+\&.keyrate=300000;
+
+# Output of /etc/paneld/banner.sh will be used as a welcome screen
+# (NetBSD/<macharch> by default)
+\&.banner="/etc/paneld/banner.sh";
+
+# Device driver
+\&.devname="hd44780";
+
+# Device file node
+\&.devnode="/dev/lcd";
+
+# Translation table for menu browser:
+# 'S' to select next menu
+# 'E' to enter selected menu
+\&.xtbl = {
+	.id="select";
+	.next='S';
+	.enter='E';
+}
+
+# Translation table for on-screen editor:
+# '>' to advance cursor by one position to the right
+# '<' to advance cursor by one position to the left
+# '^' to increment the character at the cursor posistion
+# 'v' to decrement the character at the cursor posistion
+# 'E' to accept edited content
+\&.xtbl = {
+	.id="edit";
+	.next='>';
+	.prev='<';
+	.inc='^';
+	.dec='v';
+	.enter='E';
+}
+
+\&.xtbl = {
+	.id="choice";
+	.next='>';
+	.prev='<';
+	.enter='E';
+}
+
+# Menu descriptions
+\&.menu = {
+	# This is root menu (this id is not really used)
+	.id="root";
+
+	# This menu simply browses through its childs
+	.type=select;
+
+	# "select:" will appear on the screen
+	.title="select:";
+
+	# Translation table with id "select" will be used to
+	# translate device input
+	.xlate="select";
+
+	.menu = {
+		.id="net";
+		.title="setup network";
+		.type=sequence;
+
+		.menu = {
+			.id="ipaddr";
+			.xlate="edit";
+			.title="primary ip addr";
+
+			# use output of the script as the input
+			# for editing
+			.read="/etc/paneld/ifread.sh tlp0 ipaddr";
+			.type=inet;
+		}
+		.menu = {
+			.id="ipmask";
+			.xlate="edit";
+			.title="primary netmask";
+			.read="/etc/paneld/ifread.sh tlp0 ipmask";
+			.type=inet;
+		}
+		.menu = {
+			.id="ipgw";
+			.xlate="edit";
+			.title="enter gateway";
+			.read="/etc/paneld/ifread.sh tlp0 gw";
+			.type=inet;
+		}
+		.menu = {
+			.id="save";
+			.title="save?";
+			.xlate="choice";
+			.type=confirm;
+
+			# Write down IP configuration. Use values entered by a
+			# user in "ipaddr", "ipmask" and "ipgw" menus
+			.write="/etc/paneld/ifwrite.sh tlp0 $ipaddr $ipmask $ipgw";
+
+			.menu = {
+				# Return success if user chooses "Yes"
+				.id="true";
+				.type=none;
+			}
+			.menu = {
+				# Return success if user chooses "No"
+				.id="false";
+				.type=none;
+			}
+		}
+	}
+	.menu = {
+		.title="reboot";
+		.type=sequence;
+
+		.menu = {
+			.title="reboot?";
+			.xlate="choice";
+			.type=confirm;
+			.write="/sbin/shutdown -r now";
+
+			.menu = {
+				.id="true";
+				# Quit daemon on reboot
+				.type=quit;
+			}
+			.menu = {
+				.id="false";
+				# Do nothing if user does not want to reboot
+				.type=none;
+			}
+		}
+	}
+}
+.Ed
+.Sh SEE ALSO
+.Xr paneld 8
+.Sh BUGS
+Documentation needs significant improvement.

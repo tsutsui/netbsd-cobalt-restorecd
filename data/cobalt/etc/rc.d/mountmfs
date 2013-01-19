@@ -1,0 +1,55 @@
+#!/bin/sh
+#
+# $NetBSD: mountcritlocal,v 1.7 2002/04/29 12:29:53 lukem Exp $
+#
+
+# PROVIDE: mountmfs
+# REQUIRE: root
+# BEFORE:  mountcritlocal
+
+. /etc/rc.subr
+
+name="mountmfs"
+start_cmd="mountmfs_start"
+stop_cmd=":"
+
+printmsg()
+{
+	_category="$1"
+	_message="$2"
+
+	if [ ! -f /dev/panel0 ]; then
+		cd /dev && ./MAKEDEV panel
+	fi
+
+	echo "$_category: $_message"
+	printf "%-16s%-16s" "$_category:" "  $_message" > /dev/panel0
+}
+
+mountmfs_start()
+{
+	PWD=`/bin/pwd`
+
+	printmsg "Coming up" "Create /dev/*"
+
+	cd /dev
+	/bin/sh ./MAKEDEV all >/dev/null 2>&1
+	cd $PWD
+
+	printmsg "Coming up" "Unpack /var/*"
+
+	cd /altvar
+
+	# It barfs about /dev/ being used. Oh well.
+	umount -a >/dev/null 2>&1
+	mount -a -t nonfs >/dev/null 2>&1
+	/bin/pax -rw -pe * /var
+	cd $PWD
+
+	/usr/bin/touch /var/db/dhcpd.leases
+
+	printmsg "Coming up" "Please wait..."
+}
+
+load_rc_config $name
+run_rc_command "$1"

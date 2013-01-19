@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# $NetBSD$
+#
+
+# BEFORE: named dhcpd nfsd rpcbind mountd dhclient
+# REQUIRE: network mountmfs
+
+echo "Configuring network interface..."
+
+for i in `/sbin/ifconfig -l`; do
+	case $i in
+		sl*)
+		;;
+
+		vpn*)
+		;;
+
+		ppp*)
+		;;
+
+		*)
+		echo "Found interface $i"
+		/sbin/ifconfig $i 10.0.0.254
+		exit 0
+		;;
+	esac
+done

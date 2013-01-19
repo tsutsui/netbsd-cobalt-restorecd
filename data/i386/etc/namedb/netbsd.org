@@ -1,0 +1,24 @@
+;
+; BIND data file for fake netbsd.org domain
+;
+$TTL	604800
+@	IN	SOA	bootserver.netbsd.org. netbsd.org. (
+		     2000080701		; Serial
+			 604800		; Refresh
+			  86400		; Retry
+			2419200		; Expire
+			 604800 )	; Negative Cache TTL
+;
+		NS	bootserver
+bootserver	A	10.0.0.254
+
+q-150		A	10.0.0.150
+q-151		A	10.0.0.151
+q-152		A	10.0.0.152
+q-153		A	10.0.0.153
+q-154		A	10.0.0.154
+q-155		A	10.0.0.155
+q-156		A	10.0.0.156
+q-157		A	10.0.0.157
+q-158		A	10.0.0.158
+q-159		A	10.0.0.159

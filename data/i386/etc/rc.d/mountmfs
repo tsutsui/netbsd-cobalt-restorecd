@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# $NetBSD: mountcritlocal,v 1.7 2002/04/29 12:29:53 lukem Exp $
+#
+
+# PROVIDE: mountmfs
+# REQUIRE: root
+# BEFORE:  mountcritlocal
+
+. /etc/rc.subr
+
+name="mountmfs"
+start_cmd="mountmfs_start"
+stop_cmd=":"
+
+mountmfs_start()
+{
+	PWD=`/bin/pwd`
+
+	cd /dev
+#	/usr/bin/gzip -cd /dev/dev.tgz | /usr/bin/tar pxf -
+
+	echo "Creating /dev..."
+	/bin/sh ./MAKEDEV all >/dev/null 2>&1
+
+	echo "Copying /altvar -> /var"
+
+	cd /altvar
+
+	# It will barf about /dev being used. Oh well.
+	umount -a >/dev/null 2>&1
+	mount -a -t nonfs >/dev/null 2>&1
+	/bin/pax -rw -pe * /var
+
+	/usr/bin/touch /var/db/dhcpd.leases
+	cd $PWD
+}
+
+load_rc_config $name
+run_rc_command "$1"

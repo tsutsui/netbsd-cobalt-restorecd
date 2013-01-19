@@ -1,0 +1,34 @@
+
+[032306] Changes to 4.0 Release:
+================================
+
+New Features:
+-------------
+
+ - 3.99.xx kernel and userland everywhere, including server and client
+   netboot bits
+ - Use netbsd.org domain instead of mfg.cobaltmicro.com
+ - Paneld: Applied periodic banner refresh [provided by Nolan Leake]
+ - Paneld: Use 'dig' instead of 'nslookup'; recompile with 3.99.xx
+   headers
+
+[030701] Changes to 1.6 Release:
+================================
+
+New Features:
+-------------
+
+ - 1.6.1 kernel and userland
+ - Kernel is patched to support LCD screen
+ - Boot loader is installed and is used for kernel booting by default
+   (check /root/instructions.txt file to see how to disable the boot
+   loader)
+ - Panel daemon is installed by default
+ - rc scripts patched to indicate boot progress on the LCD screen
+
+Bug fixes:
+----------
+
+ - /tmp is fixed to have 4777 permissions [reported by Doug Silver]
+ - Kernel is patched to workarund PR #20702 [reported by Marcel]
+ - Installation process is optimized a bit [thanks to Seth for help]
