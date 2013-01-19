@@ -89,8 +89,7 @@ do_prepare()
 		err 255 "Kernel image '$_kerndir/$_kern' not found."
 
 	log " + Unpacking kernel image: $_kerndir/$_kern"
-	$cp "$_kerndir/$_kern" $_dir/netbsd.gz
-	$gzip -d $_dir/netbsd.gz
+	$gzip -dc "$_kerndir/$_kern" > $_dir/netbsd
 	$chmod 755 $_dir/netbsd
 
 	log " + Fix directory layout"
@@ -112,12 +111,17 @@ prepare_nfsroot()
 
 	_sets="base.tgz etc.tgz"
 	_kern="netbsd-GENERIC.gz"
+	_kern_sysinst="netbsd-RAMDISK.gz"
 
 	_setsdir="$_client/cobalt/binary/sets"
 	_kerndir="$_client/cobalt/binary/kernel"
 
 	log "Running netboot directory setup..."
 	do_prepare "$_setsdir" "$_sets" "$_kerndir" "$_kern" "$_nfsdir"
+
+	log " + Unpacking sysinst kernel: $_kerndir/$_kern_sysinst"
+	$gzip -dc "$_kerndir/$_kern_sysinst" > $_dir/netbsd.sysinst
+	$chmod 755 $_dir/netbsd.sysinst
 
 	log "Copying release binaries onto the disk..."
 	( cd $_client && $tar cpf - cobalt ) |
@@ -145,8 +149,6 @@ prepare_nfsroot()
 		for _kernel in $_kernels; do
 			$ln -s boot.gz $_kernel
 		done
-
-	cd "$_nfsdir" && gzip -c9 usr/mdec/boot > cobalt/binary/kernel/boot.gz
 
 	cd "$_nfsdir" && $cp $basedir/data/common/.cshrc root/
 }
@@ -180,14 +182,14 @@ prepare_cdroot()
 }
 
 #
-# prepare_cddir <server> <client> <cddir> <filename> <source> <tooldir>
+# prepare_cddir <server> <client> <cddir> <filename> <source> <makefs>
 #               <tmpdir>
 #	Prepares CD directory suitable for later use with makefs(8).
 #
 prepare_cddir()
 {
 	_server="$1"; _client="$2"; _cddir="$3"; _filename="$4"; _source="$5"
-	_tooldir="$6"; _tmpdir="$7"
+	_makefs="$6"; _tmpdir="$7"
 
 	prepare_cdroot "$_server" "$_cddir"
 	prepare_nfsroot "$_client" "$_cddir"
@@ -244,7 +246,7 @@ prepare_cdinstructions()
 }
 
 #
-# create_cd <server> <client> <cddir> <filename> <source> <tooldir>
+# create_cd <server> <client> <cddir> <filename> <source> <makefs>
 #           <tmpdir>
 #	Store all required binaries in <tmpdir> and build ISO image.
 #
@@ -253,7 +255,7 @@ create_cd()
 	prepare_cddir "$@"
 
 	_server="$1"; _client="$2"; _cddir="$3"; _filename="$4"; _source="$5"
-	_tooldir="$6"; _tmpdir="$7"
+	_makefs="$6"; _tmpdir="$7"
 
 	[ -z "$_filename" ] && {
 		warn "No CD image name supplied, suppress image build."
@@ -268,10 +270,6 @@ create_cd()
 		$mkdir -p $_imagedir ||
 			err 255 "Cannot create '$_imagedir' directory."
 	}
-
-	_nbmakefs="$_tooldir/bin/nbmakefs"
-	[ ! -x "$_nbmakefs" ] &&
-		err 255 "There is no 'nbmakefs' in tool directory."
 
 	_specfile=$_tmpdir/spec
 	_specroot=$_tmpdir/spec.root
@@ -293,7 +291,7 @@ create_cd()
 	    $_specnfsroot $basedir/data/common/spec.nfsroot > $_specfile
 
 	_bootxx=$_cddir/usr/mdec/bootxx_cd9660
-	"$_nbmakefs" -t cd9660 -F $_specfile -o \
+	"$_makefs" -t cd9660 -F $_specfile -o \
 	    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot,allow-deep-trees,allow-max-name,allow-multidot \
 	    "$_filename".tmp $_cddir && \
 	    mv "$_filename".tmp "$_filename"
@@ -315,7 +313,7 @@ usage()
 	$echo "                 for client to netboot"
 	$echo "    source       NetBSD sources which were used to build all"
 	$echo "                 of the above"
-	$echo "    tooldir      Build tools directory which has makefs(1)"
+	$echo "    makefs       Path to makefs(1) tool"
 	$echo ""
 	$echo "Optional parameters:"
 	$echo "    tmpdir       Place to keep CD data"
@@ -366,8 +364,8 @@ bootstrap()
 
 	[ -z "$opt_server" ] && usage
 	[ -z "$opt_client" ] && usage
-	[ -z "$opt_tooldir" ] && usage
 	[ -z "$opt_source" ] && usage
+	[ -z "$opt_makefs" ] && usage
 
 	[ -z "$opt_tmpdir" ] && opt_tmpdir="$basedir/cd.tmp"
 	[ -z "$opt_indir" ] && opt_indir="$opt_tmpdir/restorecd"
@@ -380,7 +378,7 @@ main()
 {
 	bootstrap "$@"
 	create_cd "$opt_server" "$opt_client" "$opt_indir" "$opt_filename" \
-		  "$opt_source" "$opt_tooldir" "$opt_tmpdir"
+		  "$opt_source" "$opt_makefs" "$opt_tmpdir"
 
 	exit 0
 }

@@ -1,5 +1,6 @@
 ./nfsroot/home type=dir uname=root gname=wheel mode=0755
 ./nfsroot/netbsd type=file uname=root gname=wheel mode=0755
+./nfsroot/netbsd.sysinst type=file uname=root gname=wheel mode=0755
 ./nfsroot/var type=dir uname=root gname=wheel mode=0755
 ./nfsroot/boot type=dir uname=root gname=wheel mode=0755
 ./nfsroot/boot/boot.gz type=file uname=root gname=wheel mode=0644

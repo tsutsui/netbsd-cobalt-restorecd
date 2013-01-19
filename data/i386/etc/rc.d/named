@@ -49,20 +49,15 @@ named_migrate()
 	if $diff; then
 		echo "Cannot complete migration because files are different"
 		echo "Run 'diff -r $src $dst' resolve the differences"
-	else
-		rm -fr $src
-		ln -s $dst $src
+#	else
+#		rm -fr $src
+#		ln -s $dst $src
 	fi
 )
 }
 
 named_precmd()
 {
-	if [ \( ! -r /etc/rndc.key \) -a \( ! -r /etc/rndc.conf \) -a \
-	     \( -x /usr/sbin/rndc-confgen \) ]
-	then
-		/usr/sbin/rndc-confgen -a
-	fi
 	if [ -z "$named_chrootdir" ]; then
 		return 0;
 	fi
@@ -107,12 +102,19 @@ named_precmd()
 	if [ \( -r /etc/named.conf \) -a \( ! -h /etc/named.conf \) -a \
 	     \( ! -r ${named_chrootdir}/etc/named.conf \) ]
 	then
-		mv /etc/named.conf ${named_chrootdir}/etc/named.conf
-		ln -s ${named_chrootdir}/etc/named.conf /etc/named.conf
+#		mv /etc/named.conf ${named_chrootdir}/etc/named.conf
+#		ln -s ${named_chrootdir}/etc/named.conf /etc/named.conf
+		cp -p /etc/named.conf ${named_chrootdir}/etc/named.conf
 	fi
 	if [ \( ! -r ${named_chrootdir}/etc/named.conf \) -a \
 	    \( -r ${named_chrootdir}/etc/namedb/named.conf \) ]; then
 		ln -s namedb/named.conf ${named_chrootdir}/etc
+	fi
+	if [ \( ! -r ${named_chrootdir}/etc/rndc.key \) -a \
+	    \( ! -r ${named_chrootdir}/etc/rndc.conf \) -a \
+	     \( -x /usr/sbin/rndc-confgen \) ]
+	then
+		/usr/sbin/rndc-confgen -a -t ${named_chrootdir}
 	fi
 
 	if [ -f /etc/localtime ]; then

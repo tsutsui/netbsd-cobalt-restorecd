@@ -2,9 +2,9 @@ Typical 'restorecd' script invocation:
 
 0. fetch and extract newer restorecd-*.tar.gz
 
-% ftp [URL to path]/restorecd-current-20081028.tar.gz
+% ftp [URL to path]/restorecd-current-[date].tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20081028.tar.gz
+% tar zxf restorecd-[date].tar.gz
 % cd restorecd-current
 
   Then just type "make", or try the following procedure:
@@ -18,11 +18,11 @@ Typical 'restorecd' script invocation:
 
 with rsync:
 % rsync -va --files-from=restorecd-fetch.lst \
-    rsync://rsync.NetBSD.org/NetBSD-daily/HEAD/20081028002Z download
+    rsync://rsync.NetBSD.org/NetBSD-daily/HEAD/20081030002Z download
 
 with wget:
 % (cd download ; \
-  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD-daily/HEAD/200810280002Z/ \
+  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD-daily/HEAD/200810300002Z/ \
   --no-host-directories --cut-dirs=3 --timestamping --force-directories \
   --input-file=../restorecd-fetch.lst)
 
@@ -30,10 +30,10 @@ with wget:
 
 2. extract NetBSD sources
 
-% tar zxf download/source/sets/gnusrc.tgz
-% tar zxf download/source/sets/sharesrc.tgz
-% tar zxf download/source/sets/src.tgz
-% tar zxf download/source/sets/syssrc.tgz
+% tar -zxf download/source/sets/gnusrc.tgz
+% tar -zxf download/source/sets/sharesrc.tgz
+% tar -zxf download/source/sets/src.tgz
+% tar -zxf download/source/sets/syssrc.tgz
 
 2a. rebuild paneld(8)
 
@@ -84,10 +84,11 @@ with wget:
 % sh restorecd server=`pwd`/download \
                client=`pwd`/download \
                source=`pwd`/usr/src  \
-               tooldir=`pwd`/usr/src/tooldir.cobalt -v
+               makefs=`pwd`/usr/src/tooldir.cobalt/bin/nbmakefs -v
 
    NOTE1: use absolute paths to extracted restorecd dir (otherwise it fails)
-   NOTE2: use your TOOLDIR for tooldir= arg
+   NOTE2: use your TOOLDIR path for makefs= arg
           if it isn't .../usr/src/tooldir.cobalt
+          (if your host is running NetBSD, you can use /usr/sbin/makefs)
 
   Now you have an iso image in cd.tmp dir

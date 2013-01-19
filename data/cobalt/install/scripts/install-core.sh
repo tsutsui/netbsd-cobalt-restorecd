@@ -213,24 +213,28 @@ init_filesystems()
 
 install_boot()
 {
-	printmsg "Disk Setup" "Setup /boot"
+	printmsg "System install" "Setup /boot"
 
-	$MOUNT $ALTROOT_DEV /mnt
-	$MKDIR /mnt/boot
-	$MKDIR /mnt/usr /mnt/usr/games
+	bootfs=/mnt/ext2
+
+	$MKDIR $bootfs
+	$MOUNT $ALTROOT_DEV $bootfs
+
+	$MKDIR $bootfs/boot
+	$MKDIR $bootfs/usr $bootfs/usr/games
 
 	# Copy boot loader and the kernels as a backup measure
-	$CP /cobalt/binary/kernel/boot.gz /mnt/boot
-	$CP /cobalt/binary/kernel/netbsd-INSTALL.gz /mnt/boot
-	$LN /mnt/boot/netbsd-INSTALL.gz /mnt/usr/games/.doug
+	$GZIP -9c /mnt/usr/mdec/boot > $bootfs/boot/boot.gz
+	$CP /cobalt/binary/kernel/netbsd-INSTALL.gz $bootfs/boot
+	$LN $bootfs/boot/netbsd-INSTALL.gz $bootfs/usr/games/.doug
 
-	cd /mnt/boot
+	cd $bootfs/boot
 	for i in $RAQ_KERNELS; do
-		$LN boot.gz $i
+		$LN -s boot.gz $i
 	done
 
 	cd /
-	$UMOUNT /mnt
+	$UMOUNT $bootfs
 }
 
 install_files()
@@ -253,6 +257,8 @@ install_files()
 
 	printmsg "System install" "Unpack kernel"
 	$GZIP -cd /cobalt/binary/kernel/netbsd-GENERIC.gz > /mnt/netbsd
+
+	install_boot
 
 	printmsg "System install" "Create /dev/*"
 	if [ -d /mnt/dev ]; then
@@ -281,7 +287,6 @@ install_files()
 	printmsg "System install" "Finalizing..."
 
 	$MKDIR /mnt/kern /mnt/proc
-	$MKDIR /mnt/ext2
 
 	# Fix permissions
 	$CHMOD 755 /mnt/var
@@ -323,7 +328,6 @@ install()
 	init_filesystems
 
 	# 4. Install kernel(s) and files.
-	install_boot
 	install_files
 
 	# 5. Finalize the installation and reboot.

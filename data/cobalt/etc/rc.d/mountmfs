@@ -22,7 +22,7 @@ printmsg()
 		cd /dev && ./MAKEDEV panel
 	fi
 
-	echo "$_category: $_message"
+	echo "$_message"
 	printf "%-16s%-16s" "$_category" "  $_message" > /dev/panel0
 }
 
@@ -43,8 +43,6 @@ mountmfs_start()
 	cd /altvar
 	/bin/pax -rw -pe * /var
 	cd $PWD
-
-	printmsg "[Starting up]" "Please wait..."
 }
 
 load_rc_config $name

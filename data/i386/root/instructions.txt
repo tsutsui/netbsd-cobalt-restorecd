@@ -104,7 +104,7 @@ A: This may be a problem with the hard drive configuration. Here is
 
 Q: Installation was ok, but the boot loader doesn't seem to boot a kernel
 
-A: Please report this to port-cobalt@netbsd.org.  In the meantime, use the
+A: Please report this to port-cobalt@NetBSD.org.  In the meantime, use the
    following workaround:
 
    - Connect a PC or terminal to the appliance's serial port (115200 8N1)

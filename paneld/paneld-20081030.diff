@@ -1,0 +1,1805 @@
+diff -ur paneltools.orig/paneld/Makefile paneltools/paneld/Makefile
+--- paneltools.orig/paneld/Makefile	2003-03-04 05:47:08.000000000 +0900
++++ paneltools/paneld/Makefile	2008-10-30 03:27:30.000000000 +0900
+@@ -1,15 +1,24 @@
+ #	from: @(#)Makefile	5.8 (Berkeley) 7/28/90
+ #	$NetBSD$
+ 
++WARNS?=		1
++BINDIR?=	/usr/sbin
++
+ # .if ${MACHINE} == "cobalt"
+ PROG=		paneld
+-# CFLAGS+=	-O0 -g -D_DEBUG -D_USE_HD44780
+-CFLAGS+=	-D_USE_HD44780
++#DBG=		-O0 -g
++#CPPFLAGS+=	-D_DEBUG
++CPPFLAGS+=	-D_USE_HD44780
++CPPFLAGS+=	-I. -I${.CURDIR}
++CPPFLAGS.hd44780.c+=	-I${NETBSDSRCDIR}/sys -I${NETBSDSRCDIR}/common/include
+ SRCS=		cf-parse.y cf-lex.c paneld.c io.c menu.c window.c
+ SRCS+=		inet_ops.c confirm_ops.c select_ops.c sequence_ops.c
+ SRCS+=		inet6_ops.c none_ops.c exit_ops.c quit_ops.c
+ SRCS+=		text_ops.c scankey.c cons.c device.c
+ SRCS+=		hd44780.c util.c int_ops.c hex_ops.c
++
++LDADD+=	-lutil
++DPADD+=	${LIBUTIL}
+ # .endif
+ 
+ MAN=		paneld.8 paneld.conf.5
+diff -ur paneltools.orig/paneld/cf-lex.c paneltools/paneld/cf-lex.c
+--- paneltools.orig/paneld/cf-lex.c	2008-10-30 03:21:24.000000000 +0900
++++ paneltools/paneld/cf-lex.c	2008-10-30 03:25:59.000000000 +0900
+@@ -28,6 +28,7 @@
+  */
+ 
+ #include <ctype.h>
++#include <err.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -48,13 +49,13 @@
+ 		} else { \
+ 			(c) = getc((cf)->f); \
+ 		} \
+-	} while(0)
++	} while (/*CONSTCOND*/0)
+ 
+ #define unget_char(c, cf) \
+ 	do { \
+ 		(cf)->cno--; \
+ 		(cf)->lookahead = (c); \
+-	} while(0)
++	} while (/*CONSTCOND*/0)
+ 
+ struct lex_data {
+ 	FILE *f;
+@@ -78,8 +79,10 @@
+ static int	lookup_keyword(void);
+ 
+ int
+-scan_identifier() {
++scan_identifier(void)
++{
+ 	int i;
++
+ 	for (i = 0; i < MAX_ID_LENGTH; i++) {
+ 		int c;
+ 
+@@ -100,8 +103,10 @@
+ }
+ 
+ int
+-scan_num() {
++scan_num(void)
++{
+ 	int i;
++
+ 	for (i = 0; i < MAX_ID_LENGTH; i++) {
+ 		int c;
+ 
+@@ -121,8 +126,10 @@
+ }
+ 
+ int
+-lookup_keyword() {
++lookup_keyword(void)
++{
+ 	int i;
++
+ 	static struct {
+ 		const char *nm;
+ 		int tok;
+@@ -173,8 +180,10 @@
+ }
+ 
+ int
+-scan_cmd() {
++scan_cmd(void)
++{
+ 	int token = scan_identifier();
++
+ 	if (token == TK_IDENTIFIER) {
+ 		token = lookup_keyword();
+ 	}
+@@ -182,7 +191,7 @@
+ }
+ 
+ int
+-scan_char()
++scan_char(void)
+ {
+ 	int c;
+ 	int cend;
+@@ -198,8 +207,10 @@
+ }
+ 
+ int
+-scan_string() {
++scan_string(void)
++{
+ 	int i;
++
+ 	for (i = 0; i < MAX_ID_LENGTH; i++) {
+ 		int c;
+ 
+@@ -223,7 +234,9 @@
+ }
+ 
+ int
+-scan_comment() {
++scan_comment(void)
++{
++
+ 	for (;;) {
+ 		int c;
+ 		get_char(c, cfile);
+@@ -232,11 +245,12 @@
+ 			break;
+ 		}
+ 	}
+-	return (-1);
++	return -1;
+ }
+ 
+ int
+-yylex() {
++yylex(void)
++{
+ 	int token = -1;
+ 
+ 	while (token < 0) {
+@@ -296,11 +310,13 @@
+ 		}
+ 	}
+ 
+-	return (token);
++	return token;
+ }
+ 
+ void
+-yyerror(const char *msg) {
++yyerror(const char *msg)
++{
++
+ 	util_trace(LOG_ERR, "[%s:%d] %s", cfile->fnm, cfile->lineno, msg);
+ 	/* NORETURN */
+ }
+@@ -308,38 +324,42 @@
+ void
+ yylex_init(const char *fname)
+ {
+-	cfile = (struct lex_data*)cf_malloc(sizeof(struct lex_data));
++
++	cfile = cf_malloc(sizeof(struct lex_data));
+ 	memset(cfile, 0, sizeof(struct lex_data));
+ 
+-	if ( (cfile->f = fopen(fname, "r")) == NULL)
++	if ((cfile->f = fopen(fname, "r")) == NULL)
+ 		util_trace(LOG_ERR, "cannot open %s", fname);
+ 
+ 	cfile->fnm = fname;
+ 	cfile->lineno = 1;
+-	cfile->id = (char*)cf_malloc(MAX_ID_LENGTH);
++	cfile->id = cf_malloc(MAX_ID_LENGTH);
+ }
+ 
+ void
+-yylex_fini()
++yylex_fini(void)
+ {
++
+ 	fclose(cfile->f);
+ 	free(cfile->id);
+ 	free(cfile);
+ }
+ 
+-void*
++void *
+ cf_malloc(size_t size)
+ {
+ 	void *ptr = malloc(size);
++
+ 	if (ptr == NULL)
+ 		err(EXIT_FAILURE, NULL);
+ 	return ptr;
+ }
+ 
+-char*
++char *
+ cf_strdup(const char *str)
+ {
+ 	char *s = strdup(str);
++
+ 	if (s == NULL)
+ 		err(EXIT_FAILURE, NULL);
+ 	return s;
+diff -ur paneltools.orig/paneld/cf-parse.y paneltools/paneld/cf-parse.y
+--- paneltools.orig/paneld/cf-parse.y	2008-10-30 03:21:24.000000000 +0900
++++ paneltools/paneld/cf-parse.y	2008-10-30 02:55:08.000000000 +0900
+@@ -30,6 +30,7 @@
+ 
+ #include <err.h>
+ #include <stdio.h>
++#include <string.h>
+ 
+ #include "paneld.h"
+ #include "cf-lex.h"
+@@ -310,20 +311,22 @@
+ %%
+ #define DEFAULT_BUFSZ	128
+ 
+-static char*
++static char *
+ get_default_buf(int *sz)
+ {
++
+ 	*sz = DEFAULT_BUFSZ;
+-	return (char*)cf_malloc(DEFAULT_BUFSZ);
++	return cf_malloc(DEFAULT_BUFSZ);
+ }
+ 
+ /*
+  * Try to resolve a reference to another menu from external
+  * command's argument list
+  */
+-static char*
++static char *
+ cf_resolve_ref(struct menu *m, char *id)
+ {
++
+ 	for (; m != NULL; m = m->prev) {
+ 		if ((m->id != NULL) && !strcmp(m->id, id)) {
+ 			if (m->io.buf == NULL)
+@@ -344,6 +347,7 @@
+ {
+ 	int i;
+ 	int seq = (p->ops == get_sequence_ops());
++
+ 	for (i = 0; args[i] != NULL; i++) {
+ 		if (*args[i] == '$') {
+ 			char *buf;
+@@ -400,8 +404,8 @@
+ /*
+  * Pop menu off the stack
+  */
+-static struct menu*
+-cf_pop_menu(struct menu* m)
++static struct menu *
++cf_pop_menu(struct menu *m)
+ {
+ 	struct menu *prev = root;
+ 
+@@ -424,6 +428,7 @@
+ cf_push_menu(struct menu *m)
+ {
+ 	struct menu *prev = root;
++
+ 	root = m;
+ 	return prev;
+ }
+@@ -432,17 +437,19 @@
+  * Set root menu
+  */
+ static void
+-cf_root_menu(struct menu* m)
++cf_root_menu(struct menu *m)
+ {
++
+ 	root = m;
+ }
+ 
+ /*
+  * Add childs to a parent menu
+  */
+-static struct menu*
+-cf_add_child(struct menu* child)
++static struct menu *
++cf_add_child(struct menu *child)
+ {
++
+ 	if (root != NULL)
+ 		root->child = child;
+ 	return root;
+@@ -451,9 +458,10 @@
+ /*
+  * Add sibling to a menu
+  */
+-static struct menu*
+-cf_add_sibling(struct menu* root, struct menu* m)
++static struct menu *
++cf_add_sibling(struct menu *root, struct menu *m)
+ {
++
+ 	root->next = m;
+ 	if (m != NULL)
+ 		m->prev = root;
+@@ -464,12 +472,12 @@
+ /*
+  * Allocate menu structure
+  */
+-static struct menu*
++static struct menu *
+ cf_create_menu(void)
+ {
+ 	struct menu *m;
+ 
+-	m = (struct menu*)cf_malloc(sizeof(struct menu));
++	m = cf_malloc(sizeof(struct menu));
+ 	memset(m, 0, sizeof(struct menu));
+ 
+ 	return m;
+@@ -483,7 +491,7 @@
+ {
+ 	struct lcd_xlate *x;
+ 
+-	x = (struct lcd_xlate*)cf_malloc(sizeof(struct lcd_xlate));
++	x = cf_malloc(sizeof(struct lcd_xlate));
+ 	memset(x, 0, sizeof(struct lcd_xlate));
+ 
+ 	x->next = xlate;
+@@ -493,7 +501,7 @@
+ /*
+  * Lookup translation table by identifier
+  */
+-static struct lcd_xlate*
++static struct lcd_xlate *
+ cf_lookup_xlate(const char *x_nm)
+ {
+ 	struct lcd_xlate *x = xlate;
+@@ -515,13 +523,13 @@
+  * Parse the configuration file
+  */
+ void
+-cf_parse(const char *cfile) {
++cf_parse(const char * cfile) {
+ /*	yydebug=1;*/
+ 
+ 	root = NULL;
+ 	xlate = NULL;
+ 
+-	globals = (struct lcd_globals*)cf_malloc(sizeof(struct lcd_globals));
++	globals = cf_malloc(sizeof(struct lcd_globals));
+ 	memset(globals, 0, sizeof(struct lcd_globals));
+ 
+ 	yylex_init(cfile);
+diff -ur paneltools.orig/paneld/confirm_ops.c paneltools/paneld/confirm_ops.c
+--- paneltools.orig/paneld/confirm_ops.c	2003-03-04 07:05:02.000000000 +0900
++++ paneltools/paneld/confirm_ops.c	2008-10-30 02:55:51.000000000 +0900
+@@ -46,6 +46,7 @@
+ cfrm_next(struct menu *m)
+ {
+ 	int x;
++
+ 	if (window->edit()->getpos(&x) == E_OK) {
+ 		if (x == _Y_OFF)
+ 			x = _Y_OFF + _N_OFF;
+@@ -59,6 +60,7 @@
+ static int
+ cfrm_prev(struct menu *m)
+ {
++
+ 	return cfrm_next(m);
+ }
+ 
+@@ -92,6 +94,7 @@
+ cfrm_select(struct menu *m)
+ {
+ 	int x, y;
++
+ 	if (dev->getsize(&x, &y) == E_OK) {
+ 		window->set_title(m->nm);
+ 		window->edit()->setbuf(txt, ALIGN_CENTER);
+@@ -108,7 +111,7 @@
+ 	return E_IO;
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_confirm_ops(void)
+ {
+ 	static struct menu_ops cfrm_ops = {
+@@ -119,5 +122,6 @@
+ 		cfrm_select,
+ 		none_allocbuf
+ 	};
++
+ 	return &cfrm_ops;
+ }
+diff -ur paneltools.orig/paneld/cons.c paneltools/paneld/cons.c
+--- paneltools.orig/paneld/cons.c	2008-10-30 03:21:24.000000000 +0900
++++ paneltools/paneld/cons.c	2008-10-30 02:57:14.000000000 +0900
+@@ -28,6 +28,7 @@
+  */
+ 
+ #include <stdio.h>
++#include <string.h>
+ 
+ #include "paneld.h"
+ 
+@@ -53,7 +54,7 @@
+ 		 fprintf(stderr, "%d is out of bounds [height]", _y); \
+ 		 *ptr = 0; \
+ 	 } \
+- } while(0)
++ } while (/*CONSTCOND*/0)
+ 
+ 
+ static char screen[_HEIGHT][_WIDTH];
+@@ -65,24 +66,28 @@
+ static int
+ cons_open(const char *node)
+ {
++
+ 	return E_OK;
+ }
+ 
+ static int
+ cons_close(void)
+ {
++
+ 	return E_OK;
+ }
+ 
+ static void
+ cons_devcap(struct lcd_devcap *cap)
+ {
++
+ 	memset(cap, 0, sizeof(struct lcd_devcap));
+ }
+ 
+ static int
+ cons_getsize(int *x, int *y)
+ {
++
+ 	*x = _WIDTH;
+ 	*y = _HEIGHT;
+ 	return E_OK;
+@@ -92,6 +97,7 @@
+ cons_redraw(void)
+ {
+ 	int i, j;
++
+ 	for (i = 0; i < _WIDTH; i++)
+ 		fprintf(stderr, "-");
+ 	fprintf(stderr, "\n");
+@@ -116,6 +122,7 @@
+ static int
+ cons_clear(void)
+ {
++
+ 	memset(screen, ' ', sizeof(screen));
+ 	return cons_redraw();
+ }
+@@ -123,6 +130,7 @@
+ static int
+ cons_putchr(int c)
+ {
++
+ 	util_trace(LOG_DEBUG, "cons_putchr at [%d][%d] = %c", y, x, c);
+ 
+ 	screen[y][x] = c;
+@@ -133,6 +141,7 @@
+ cons_putstr(const char *buf, int len)
+ {
+ 	int i;
++
+ 	_CHECK_BUF(x + len -1, y);
+ 
+ 	util_trace(LOG_DEBUG,
+@@ -147,6 +156,7 @@
+ static int
+ cons_setpos(int _x, int _y)
+ {
++
+ 	_CHECK_BUF(_x, _y);
+ 	x = _x;
+ 	y = _y;
+@@ -156,6 +166,7 @@
+ static int
+ cons_cursor(int on, int blink)
+ {
++
+ 	cursor_on = on;
+ 	return E_OK;
+ }
+@@ -164,6 +175,7 @@
+ cons_getchr(int *c, int timeout)
+ {
+ 	int _c = getchar();
++
+ 	getchar(); /* skip eol */
+ 	*c = _c;
+ 	return E_OK;
+@@ -182,8 +194,9 @@
+ 	cons_getchr
+ };
+ 
+-struct lcd_dev*
++struct lcd_dev *
+ get_console(void)
+ {
++
+ 	return &cons_ops;
+ }
+diff -ur paneltools.orig/paneld/device.c paneltools/paneld/device.c
+--- paneltools.orig/paneld/device.c	2003-03-04 07:05:09.000000000 +0900
++++ paneltools/paneld/device.c	2008-10-30 02:57:35.000000000 +0900
+@@ -27,6 +27,8 @@
+  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#include <string.h>
++
+ #include "paneld.h"
+ 
+ static struct {
+@@ -43,11 +45,12 @@
+ /*
+  * Find device by name and initialize it
+  */
+-struct lcd_dev*
++struct lcd_dev *
+ device_attach(const char *type, const char *node)
+ {
+ 	int i;
+ 	struct lcd_dev *dev;
++
+ 	if ((type != NULL) && (node != NULL)) {
+ 		for (i = 0; device_cf[i].nm != NULL; i++) {
+ 			if (!strcmp(device_cf[i].nm, type)) {
+@@ -67,5 +70,6 @@
+ void
+ device_detach(struct lcd_dev *dev)
+ {
++
+ 	dev->close();
+ }
+diff -ur paneltools.orig/paneld/exit_ops.c paneltools/paneld/exit_ops.c
+--- paneltools.orig/paneld/exit_ops.c	2003-03-04 07:05:12.000000000 +0900
++++ paneltools/paneld/exit_ops.c	2008-10-30 03:06:54.000000000 +0900
+@@ -34,10 +34,11 @@
+ static int
+ exit_select(struct menu *m)
+ {
++
+ 	return E_EXIT;
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_exit_ops(void)
+ {
+ 	static struct menu_ops exit_ops = {
+@@ -48,5 +49,6 @@
+ 		exit_select,
+ 		none_allocbuf
+ 	};
++
+ 	return &exit_ops;
+ }
+diff -ur paneltools.orig/paneld/hd44780.c paneltools/paneld/hd44780.c
+--- paneltools.orig/paneld/hd44780.c	2008-10-30 03:21:24.000000000 +0900
++++ paneltools/paneld/hd44780.c	2008-10-30 03:25:32.000000000 +0900
+@@ -30,13 +30,14 @@
+ #if defined(_USE_HD44780)
+ 
+ #include <fcntl.h>
++#include <string.h>
+ #include <unistd.h>
+ #include <sys/ioctl.h>
+ #include <sys/types.h>
+ #include <sys/poll.h>
+ 
+ #include <dev/ic/hd44780reg.h>
+-#include <dev/ic/hd44780_subr.h>
++#include <dev/ic/hd44780var.h>
+ 
+ #include "paneld.h"
+ 
+@@ -47,7 +48,8 @@
+ static int
+ hd44780_open(const char *node)
+ {
+-	if ( (fd = open(node, O_RDWR, 0)) == -1)
++
++	if ((fd = open(node, O_RDWR, 0)) == -1)
+ 		return E_IO;
+ 	if (ioctl(fd, HLCD_GET_INFO, &hi) == -1)
+ 		return E_IO;
+@@ -57,6 +59,7 @@
+ static int
+ hd44780_close(void)
+ {
++
+ 	close(fd);
+ 	fd = 0;
+ 	return E_OK;
+@@ -65,6 +68,7 @@
+ static void
+ hd44780_devcap(struct lcd_devcap *cap)
+ {
++
+ 	cap->capabilities = DEV_CAP_AUTOREPEAT;
+ 	if (cap->resist <= 0)
+ 		cap->resist = 2000000; /* 2 sec */
+@@ -77,6 +81,7 @@
+ static int
+ hd44780_getsize(int *rows, int *lines)
+ {
++
+ 	util_trace(LOG_DEBUG, "getsize: %d, %d", hi.phys_rows, hi.lines);
+ 
+ 	*lines = hi.lines;
+@@ -87,6 +92,7 @@
+ static int
+ hd44780_clear(void)
+ {
++
+ 	if (ioctl(fd, HLCD_CLEAR, 0) == -1)
+ 		return E_IO;
+ 	return E_OK;
+@@ -175,7 +181,7 @@
+ static int
+ hd44780_getchr(int *c, int timeout)
+ {
+-	u_int8_t buf;
++	uint8_t buf;
+ 	struct pollfd fds[1];
+ 
+ 	fds[0].fd = fd;
+@@ -205,6 +211,7 @@
+ struct lcd_dev*
+ get_hd44780(void)
+ {
++
+ 	return &hd44780_ops;
+ }
+ 
+diff -ur paneltools.orig/paneld/hex_ops.c paneltools/paneld/hex_ops.c
+--- paneltools.orig/paneld/hex_ops.c	2003-03-04 07:05:17.000000000 +0900
++++ paneltools/paneld/hex_ops.c	2008-10-30 03:06:42.000000000 +0900
+@@ -39,7 +39,7 @@
+ static int	hex_inc(struct menu *m);
+ static int	hex_dec(struct menu *m);
+ static int	hex_select(struct menu *m);
+-static char*	hex_allocbuf(int *sz);
++static char	*hex_allocbuf(int *sz);
+ 
+ static int
+ hex_open(struct menu *m)
+@@ -59,13 +59,14 @@
+ 	}
+ 
+ 	for (i = 0; m->io.buf[i] != 0; i++) {
+-		if (!isdigit(m->io.buf[i])) {
++		if (!isdigit((unsigned char)m->io.buf[i])) {
+ 			if ((m->io.buf[i] >= 'a') &&
+ 					(m->io.buf[i] <= 'f'))
+ 				continue;
+ 			else if ((m->io.buf[i] >= 'A') &&
+ 					(m->io.buf[i] <= 'F'))
+-				m->io.buf[i] = tolower(m->io.buf[i]);
++				m->io.buf[i] =
++				    tolower((unsigned char)m->io.buf[i]);
+ 			else
+ 				return E_IO;
+ 		}
+@@ -77,6 +78,7 @@
+ static int
+ hex_close(struct menu *m)
+ {
++
+ 	util_intstrip(m->io.buf);
+ 	return exec_write(m);
+ }
+@@ -84,12 +86,14 @@
+ static int
+ hex_next(struct menu *m)
+ {
++
+ 	return window->edit()->right();
+ }
+ 
+ static int
+ hex_prev(struct menu *m)
+ {
++
+ 	return window->edit()->left();
+ }
+ 
+@@ -97,6 +101,7 @@
+ hex_inc(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (c == '9')
+ 			return window->edit()->putchr('a');
+@@ -112,6 +117,7 @@
+ hex_dec(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (c == '0')
+ 			return window->edit()->putchr('f');
+@@ -126,6 +132,7 @@
+ static int
+ hex_select(struct menu *m)
+ {
++
+ 	if (hex_open(m) == E_OK) {
+ 		window->set_title(m->nm);
+ 		window->edit()->setbuf(m->io.buf, ALIGN_ANY);
+@@ -137,13 +144,13 @@
+ 	return E_IO;
+ }
+ 
+-static char*
++static char *
+ hex_allocbuf(int *sz)
+ {
+-	return (char*)cf_malloc(*sz + 1);
++	return cf_malloc(*sz + 1);
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_hex_ops(void)
+ {
+ 	static struct menu_ops hex_ops = {
+@@ -154,5 +161,6 @@
+ 		hex_select,
+ 		hex_allocbuf
+ 	};
++
+ 	return &hex_ops;
+ }
+diff -ur paneltools.orig/paneld/inet6_ops.c paneltools/paneld/inet6_ops.c
+--- paneltools.orig/paneld/inet6_ops.c	2003-03-04 07:05:20.000000000 +0900
++++ paneltools/paneld/inet6_ops.c	2008-10-30 03:06:32.000000000 +0900
+@@ -27,6 +27,7 @@
+  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#include <stdio.h>
+ #include <ctype.h>
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+@@ -45,7 +46,7 @@
+ static int	inet6_inc(struct menu *m);
+ static int	inet6_dec(struct menu *m);
+ static int	inet6_select(struct menu *m);
+-static char*	inet6_allocbuf(int *sz);
++static char	*inet6_allocbuf(int *sz);
+ 
+ static int
+ inet6_open(struct menu *m)
+@@ -82,6 +83,7 @@
+ static int
+ inet6_next(struct menu *m)
+ {
++
+ 	if (window->edit()->right() == E_OK) {
+ 		int c;
+ 		if (window->edit()->getchr(&c) == E_OK) {
+@@ -96,6 +98,7 @@
+ static int
+ inet6_prev(struct menu *m)
+ {
++
+ 	if (window->edit()->left() == E_OK) {
+ 		int c;
+ 		if (window->edit()->getchr(&c) == E_OK) {
+@@ -111,6 +114,7 @@
+ inet6_inc(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (c == '9')
+ 			window->edit()->putchr('a');
+@@ -127,6 +131,7 @@
+ inet6_dec(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (c == '0')
+ 			window->edit()->putchr('f');
+@@ -142,6 +147,7 @@
+ static int
+ inet6_select(struct menu *m)
+ {
++
+ 	if (inet6_open(m) == E_OK) {
+ 		window->set_title(m->nm);
+ 		window->edit()->setbuf(m->io.buf, ALIGN_ANY);
+@@ -153,14 +159,15 @@
+ 	return E_IO;
+ }
+ 
+-static char*
++static char *
+ inet6_allocbuf(int *sz)
+ {
++
+ 	*sz = INET6_BUFSZ + 1;
+-	return (char*)cf_malloc(INET6_BUFSZ + 1);
++	return cf_malloc(INET6_BUFSZ + 1);
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_inet6_ops(void)
+ {
+ 	static struct menu_ops inet6_ops = {
+@@ -171,5 +178,6 @@
+ 		inet6_select,
+ 		inet6_allocbuf
+ 	};
++
+ 	return &inet6_ops;
+ }
+diff -ur paneltools.orig/paneld/inet_ops.c paneltools/paneld/inet_ops.c
+--- paneltools.orig/paneld/inet_ops.c	2003-03-04 07:05:23.000000000 +0900
++++ paneltools/paneld/inet_ops.c	2008-10-30 03:06:37.000000000 +0900
+@@ -27,6 +27,7 @@
+  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#include <stdio.h>
+ #include <ctype.h>
+ 
+ #include <sys/socket.h>
+@@ -45,7 +46,7 @@
+ static int	inet_inc(struct menu *m);
+ static int	inet_dec(struct menu *m);
+ static int	inet_select(struct menu *m);
+-static char*	inet_allocbuf(int *sz);
++static char	*inet_allocbuf(int *sz);
+ 
+ static int
+ inet_open(struct menu *m)
+@@ -67,6 +68,7 @@
+ inet_close(struct menu *m)
+ {
+ 	struct sockaddr_in addr;
++
+ 	util_ipstrip(AF_INET, m->io.buf);
+ 	if (inet_pton(AF_INET, m->io.buf, &addr.sin_addr) != 1)
+ 		return E_BADV;
+@@ -76,6 +78,7 @@
+ static int
+ inet_next(struct menu *m)
+ {
++
+ 	if (window->edit()->right() == E_OK) {
+ 		int c;
+ 		if (window->edit()->getchr(&c) == E_OK) {
+@@ -90,6 +93,7 @@
+ static int
+ inet_prev(struct menu *m)
+ {
++
+ 	if (window->edit()->left() == E_OK) {
+ 		int c;
+ 		if (window->edit()->getchr(&c) == E_OK) {
+@@ -105,6 +109,7 @@
+ inet_inc(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (isdigit(c)) {
+ 			if (c == '9')
+@@ -120,6 +125,7 @@
+ inet_dec(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (isdigit(c)) {
+ 			if (c == '0')
+@@ -134,6 +140,7 @@
+ static int
+ inet_select(struct menu *m)
+ {
++
+ 	if (inet_open(m) == E_OK) {
+ 		window->set_title(m->nm);
+ 		window->edit()->setbuf(m->io.buf, ALIGN_ANY);
+@@ -145,14 +152,15 @@
+ 	return E_IO;
+ }
+ 
+-static char*
++static char *
+ inet_allocbuf(int *sz)
+ {
++
+ 	*sz = INET_BUFSZ + 1;
+-	return (char*)cf_malloc(INET_BUFSZ + 1);
++	return cf_malloc(INET_BUFSZ + 1);
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_inet_ops(void)
+ {
+ 	static struct menu_ops inet_ops = {
+@@ -163,5 +171,6 @@
+ 		inet_select,
+ 		inet_allocbuf
+ 	};
++
+ 	return &inet_ops;
+ }
+diff -ur paneltools.orig/paneld/int_ops.c paneltools/paneld/int_ops.c
+--- paneltools.orig/paneld/int_ops.c	2003-03-04 07:05:26.000000000 +0900
++++ paneltools/paneld/int_ops.c	2008-10-30 03:07:02.000000000 +0900
+@@ -39,7 +39,7 @@
+ static int	int_inc(struct menu *m);
+ static int	int_dec(struct menu *m);
+ static int	int_select(struct menu *m);
+-static char*	int_allocbuf(int *sz);
++static char	*int_allocbuf(int *sz);
+ 
+ static int
+ int_open(struct menu *m)
+@@ -58,7 +58,7 @@
+ 	}
+ 
+ 	for (i = 0; m->io.buf[i] != 0; i++)
+-		if (!isdigit(m->io.buf[i]))
++		if (!isdigit((unsigned char)m->io.buf[i]))
+ 		return E_IO;
+ 
+ 	return E_OK;
+@@ -68,18 +68,21 @@
+ int_close(struct menu *m)
+ {
+ 	util_intstrip(m->io.buf);
++
+ 	return exec_write(m);
+ }
+ 
+ static int
+ int_next(struct menu *m)
+ {
++
+ 	return window->edit()->right();
+ }
+ 
+ static int
+ int_prev(struct menu *m)
+ {
++
+ 	return window->edit()->left();
+ }
+ 
+@@ -87,6 +90,7 @@
+ int_inc(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (c == '9')
+ 			return window->edit()->putchr('0');
+@@ -100,6 +104,7 @@
+ int_dec(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (c == '0')
+ 			return window->edit()->putchr('9');
+@@ -112,6 +117,7 @@
+ static int
+ int_select(struct menu *m)
+ {
++
+ 	if (int_open(m) == E_OK) {
+ 		window->set_title(m->nm);
+ 		window->edit()->setbuf(m->io.buf, ALIGN_ANY);
+@@ -123,13 +129,14 @@
+ 	return E_IO;
+ }
+ 
+-static char*
++static char *
+ int_allocbuf(int *sz)
+ {
+-	return (char*)cf_malloc(*sz + 1);
++
++	return cf_malloc(*sz + 1);
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_int_ops(void)
+ {
+ 	static struct menu_ops int_ops = {
+@@ -140,5 +147,6 @@
+ 		int_select,
+ 		int_allocbuf
+ 	};
++
+ 	return &int_ops;
+ }
+diff -ur paneltools.orig/paneld/io.c paneltools/paneld/io.c
+--- paneltools.orig/paneld/io.c	2003-03-04 07:05:29.000000000 +0900
++++ paneltools/paneld/io.c	2008-10-30 03:26:12.000000000 +0900
+@@ -55,11 +55,11 @@
+ 
+ 		ptr = strchr(ptr, ' ');
+ 		if (ptr == NULL) {
+-			char **args = (char **)malloc(sizeof(char*) * (i + 1));
++			char **args = malloc(sizeof(char *) * (i + 1));
+ 			if (args == NULL)
+ 				break;
+ 
+-			memcpy(args, arr, sizeof(char*) * i);
++			memcpy(args, arr, sizeof(char *) * i);
+ 			args[i] = NULL;
+ 
+ 			*r_args = args;
+@@ -86,7 +86,7 @@
+ 	if (pipe(fd) < 0)
+ 		return E_IO;
+ 
+-	if ( (pid = fork()) < 0)
++	if ((pid = fork()) < 0)
+ 		return E_IO;
+ 	else if (pid > 0) {	/* parent */
+ 		int rd = 0;
+@@ -97,7 +97,7 @@
+ 
+ 		if ((buf != NULL) && (size > 0)) {
+ 			int i;
+-			while ( (cnt = read(fd[0], buf + rd, size)) != 0) {
++			while ((cnt = read(fd[0], buf + rd, size)) != 0) {
+ 				rd += cnt;
+ 				size -= cnt;
+ 				if (size <= 0) {
+diff -ur paneltools.orig/paneld/menu.c paneltools/paneld/menu.c
+--- paneltools.orig/paneld/menu.c	2008-10-30 03:21:24.000000000 +0900
++++ paneltools/paneld/menu.c	2008-10-30 03:20:26.000000000 +0900
+@@ -29,6 +29,7 @@
+ 
+ #include <sys/utsname.h>
+ 
++#include <stdio.h>
+ #include <unistd.h>
+ #include <malloc.h>
+ #include <string.h>
+@@ -59,7 +60,7 @@
+ 		if (scankey(&globals->devcap, 0, &key, -1) != E_OK)
+ 			return E_IO;
+ 
+-		switch( (xk = menu_xlate(m, key))) {
++		switch ((xk = menu_xlate(m, key))) {
+ 		case E_OK:
+ 			err = E_OK;
+ 			break;
+@@ -94,6 +95,7 @@
+ int
+ menu_xlate(struct menu *m, int c)
+ {
++
+ 	if (m->xlate != NULL) {
+ 		if (m->xlate->x_inc == c)
+ 			return E_INC;
+@@ -122,10 +124,7 @@
+ 	char *lines[MAX_HEIGHT];
+ 	
+ 	size = globals->buf_size;
+-	err = readconf(
+-			globals->banner_args,
+-			globals->banner_buf,
+-			&size);
++	err = readconf(globals->banner_args, globals->banner_buf, &size);
+ 
+ 	if ((err == E_OK) && (strlen(globals->banner_buf) > 0)) {
+ 		int i, j;
+@@ -149,10 +148,10 @@
+ 	} else {
+ 		struct utsname uts;
+ 		if (uname(&uts) == -1)
+-			lines[0] = "NetBSD/Cobalt";
++			lines[0] = "NetBSD/cobalt";
+ 		else {
+ 			int len = strlen(uts.sysname) + strlen(uts.machine);
+-			lines[0] = (char*)cf_malloc(len + 2);
++			lines[0] = cf_malloc(len + 2);
+ 			sprintf(lines[0], "%s/%s", uts.sysname, uts.machine);
+ 		}
+ 		lines[1] = NULL;
+diff -ur paneltools.orig/paneld/none_ops.c paneltools/paneld/none_ops.c
+--- paneltools.orig/paneld/none_ops.c	2003-03-04 07:05:34.000000000 +0900
++++ paneltools/paneld/none_ops.c	2008-10-30 03:06:25.000000000 +0900
+@@ -32,41 +32,47 @@
+ int
+ none_next(struct menu *m)
+ {
++
+ 	return E_OK;
+ }
+ 
+ int
+ none_prev(struct menu *m)
+ {
++
+ 	return E_OK;
+ }
+ 
+ int
+ none_inc(struct menu *m)
+ {
++
+ 	return E_OK;
+ }
+ 
+ int
+ none_dec(struct menu *m)
+ {
++
+ 	return E_OK;
+ }
+ 
+ int
+ none_select(struct menu *m)
+ {
++
+ 	return exec_write(m);
+ }
+ 
+-char*
++char *
+ none_allocbuf(int *sz)
+ {
++
+ 	*sz = 0;
+ 	return NULL;
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_none_ops(void)
+ {
+ 	static struct menu_ops none_ops = {
+@@ -77,5 +83,6 @@
+ 		none_select,
+ 		none_allocbuf
+ 	};
++
+ 	return &none_ops;
+ }
+diff -ur paneltools.orig/paneld/paneld.c paneltools/paneld/paneld.c
+--- paneltools.orig/paneld/paneld.c	2003-03-04 07:05:40.000000000 +0900
++++ paneltools/paneld/paneld.c	2008-10-30 03:27:53.000000000 +0900
+@@ -29,8 +29,8 @@
+ 
+ #include <sys/cdefs.h>
+ #ifndef __lint
+-__COPYRIGHT("@(#) Copyright (c) 2000\n\
+-	The NetBSD Foundation, inc. All rights reserved.\n");
++__COPYRIGHT("@(#) Copyright (c) 2000\
++	The NetBSD Foundation, inc. All rights reserved.");
+ __RCSID("$NetBSD$");
+ #endif /* !__lint */
+ 
+@@ -38,6 +38,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <unistd.h>
++#include <util.h>
+ #include <sys/stat.h>
+ 
+ #include "paneld.h"
+@@ -55,7 +56,7 @@
+ 	char *cf = "/etc/paneld.conf";
+ 
+ 	setprogname(argv[0]);
+-	while ( (ch = getopt(argc, argv, "df:")) != -1) {
++	while ((ch = getopt(argc, argv, "df:")) != -1) {
+ 		switch (ch) {
+ 		case 'f':
+ 			cf = optarg;
+@@ -103,11 +104,12 @@
+ {
+ 	pid_t pid;
+ 
+-	if ( (pid = fork()) < 0)
++	if ((pid = fork()) < 0)
+ 		exit(1);
+ 	else if (pid != 0)
+ 		exit(0);
+ 
++	pidfile(NULL);
+ 	setsid();
+ 	chdir("/");
+ 	umask(0);
+@@ -116,6 +118,7 @@
+ static void
+ usage(void)
+ {
++
+ 	(void)fprintf(stderr, "usage: %s [-f conf_file]\n", getprogname());
+ 	exit(1);
+ }
+diff -ur paneltools.orig/paneld/paneld.conf.5 paneltools/paneld/paneld.conf.5
+--- paneltools.orig/paneld/paneld.conf.5	2008-10-30 03:21:24.000000000 +0900
++++ paneltools/paneld/paneld.conf.5	2008-10-17 22:19:35.000000000 +0900
+@@ -90,10 +90,10 @@
+ .Pp
+ .Bl -item -compact -offset indent
+ .It
+-.Li Sy .xtbl No = {
++.Sy .xtbl No = {
+ .Bl -item -compact -offset indent
+ .It
+-.Li Sy .id No = Qq translation name ;
++.Sy .id No = Qq translation name ;
+ .It
+ .Li <translation statement #1>
+ .It
+@@ -133,10 +133,10 @@
+ .Pp
+ .Bl -item -compact -offset indent
+ .It
+-.Li Sy .xtbl No = {
++.Sy .xtbl No = {
+ .Bl -item -compact -offset indent
+ .It
+-.Li Sy .id No = Qq menu name ;
++.Sy .id No = Qq menu name ;
+ .It
+ .Li <statement #1>
+ .It
+@@ -144,7 +144,11 @@
+ .It
+ .Pp
+ .Li [ Sy .menu No = {
+-.It ...
++.Bl -item -compact -offset indent
++.It
++.Li ...
++.El
++.It
+ .Li } ]
+ .It
+ .Li ...
+diff -ur paneltools.orig/paneld/paneld.h paneltools/paneld/paneld.h
+--- paneltools.orig/paneld/paneld.h	2008-10-30 03:21:24.000000000 +0900
++++ paneltools/paneld/paneld.h	2008-10-30 03:13:41.000000000 +0900
+@@ -53,57 +53,57 @@
+ 
+ /* device operations */
+ struct lcd_dev {
+-	int	(* open)(const char *node);
+-	int	(* close)(void);
++	int	(*open)(const char *node);
++	int	(*close)(void);
+ 
+ #define DEV_CAP_AUTOREPEAT	0x1
+-	void	(* devcap)(struct lcd_devcap*);
+-	int	(* getsize)(int*, int*);
++	void	(*devcap)(struct lcd_devcap*);
++	int	(*getsize)(int*, int*);
+ 
+-	int	(* clear)(void);
+-	int	(* putchr)(int);
+-	int	(* putstr)(const char *buf, int len);
++	int	(*clear)(void);
++	int	(*putchr)(int);
++	int	(*putstr)(const char *buf, int len);
+ 
+-	int	(* setpos)(int x, int y);
+-	int	(* cursor)(int on, int blink);
++	int	(*setpos)(int x, int y);
++	int	(*cursor)(int on, int blink);
+ 
+-	int	(* getchr)(int *c, int timeout);
++	int	(*getchr)(int *c, int timeout);
+ };
+ 
+ /* editor operations */
+ struct lcd_edit {
+ #define ALIGN_ANY	0x0
+ #define ALIGN_CENTER	0x1
+-	int	(* setbuf)(char *buf, int align_hint);
++	int	(*setbuf)(char *buf, int align_hint);
+ 
+-	int	(* putchr)(int c);
+-	int	(* getchr)(int *c);
+-	int	(* getpos)(int *x);
+-	int	(* setpos)(int x);
+-	int	(* left)(void);
+-	int	(* right)(void);
++	int	(*putchr)(int c);
++	int	(*getchr)(int *c);
++	int	(*getpos)(int *x);
++	int	(*setpos)(int x);
++	int	(*left)(void);
++	int	(*right)(void);
+ };
+ 
+ struct lcd_window {
+-	int		(* open)(struct lcd_dev *dev);
+-	int		(* set_title)(const char *s);
+-	int		(* set_list)(struct menu *m);
+-	int		(* set_focus)(struct menu *m);
+-	int		(* clear)(void);
++	int		(*open)(struct lcd_dev *dev);
++	int		(*set_title)(const char *s);
++	int		(*set_list)(struct menu *m);
++	int		(*set_focus)(struct menu *m);
++	int		(*clear)(void);
+ 
+-	int		(* set_text)(char *lines[]);
+-	struct lcd_edit*(* edit)(void);
++	int		(*set_text)(char *lines[]);
++	struct lcd_edit	*(*edit)(void);
+ };
+ 
+ struct menu_ops {
+-	int	(* next)(struct menu *);
+-	int	(* prev)(struct menu *);
+-	int	(* inc)(struct menu *);
+-	int	(* dec)(struct menu *);
++	int	(*next)(struct menu *);
++	int	(*prev)(struct menu *);
++	int	(*inc)(struct menu *);
++	int	(*dec)(struct menu *);
+ 
+-	int	(* select)(struct menu *);
++	int	(*select)(struct menu *);
+ 
+-	char*	(* allocbuf)(int *sz); /* XXX */
++	char*	(*allocbuf)(int *sz); /* XXX */
+ };
+ 
+ struct lcd_io {
+@@ -175,17 +175,17 @@
+ extern struct lcd_globals *globals;
+ 
+ /* well-defined menu operations */
+-struct menu_ops*	get_none_ops(void);
+-struct menu_ops*	get_exit_ops(void);
+-struct menu_ops*	get_quit_ops(void);
+-struct menu_ops*	get_select_ops(void);
+-struct menu_ops*	get_confirm_ops(void);
+-struct menu_ops*	get_sequence_ops(void);
+-struct menu_ops*	get_inet_ops(void);
+-struct menu_ops*	get_inet6_ops(void);
+-struct menu_ops*	get_text_ops(void);
+-struct menu_ops*	get_int_ops(void);
+-struct menu_ops*	get_hex_ops(void);
++struct menu_ops *get_none_ops(void);
++struct menu_ops *get_exit_ops(void);
++struct menu_ops *get_quit_ops(void);
++struct menu_ops *get_select_ops(void);
++struct menu_ops *get_confirm_ops(void);
++struct menu_ops *get_sequence_ops(void);
++struct menu_ops *get_inet_ops(void);
++struct menu_ops *get_inet6_ops(void);
++struct menu_ops *get_text_ops(void);
++struct menu_ops *get_int_ops(void);
++struct menu_ops *get_hex_ops(void);
+ 
+ /* noop menu operations */
+ int	none_next(struct menu *m);
+@@ -193,7 +193,7 @@
+ int	none_inc(struct menu *m);
+ int	none_dec(struct menu *m);
+ int	none_select(struct menu *m);
+-char*	none_allocbuf(int *sz);
++char	*none_allocbuf(int *sz);
+ 
+ /* external command execution */
+ int	parse_args(char *buf, char ***r_args);
+@@ -208,14 +208,14 @@
+ int	scankey(struct lcd_devcap *cap, int do_resist, int *key, int timeout);
+ 
+ /* lcd initialization */
+-struct lcd_window*	get_window(void);
+-struct lcd_dev*		get_console(void);
+-struct lcd_dev*		get_hd44780(void);
++struct lcd_window	*get_window(void);
++struct lcd_dev		*get_console(void);
++struct lcd_dev		*get_hd44780(void);
+ 
+-struct lcd_window* window_create(void);
++struct lcd_window *window_create(void);
+ void window_destroy(struct lcd_window *w);
+ 
+-struct lcd_dev*	device_attach(const char *type, const char *node);
++struct lcd_dev	*device_attach(const char *type, const char *node);
+ void		device_detach(struct lcd_dev *dev);
+ 
+ /* int/hex normalization */
+diff -ur paneltools.orig/paneld/quit_ops.c paneltools/paneld/quit_ops.c
+--- paneltools.orig/paneld/quit_ops.c	2003-03-04 07:05:47.000000000 +0900
++++ paneltools/paneld/quit_ops.c	2008-10-30 03:13:56.000000000 +0900
+@@ -34,10 +34,11 @@
+ static int
+ quit_select(struct menu *m)
+ {
++
+ 	return E_QUIT;
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_quit_ops(void)
+ {
+ 	static struct menu_ops quit_ops = {
+@@ -48,5 +49,6 @@
+ 		quit_select,
+ 		none_allocbuf
+ 	};
++
+ 	return &quit_ops;
+ }
+diff -ur paneltools.orig/paneld/scankey.c paneltools/paneld/scankey.c
+--- paneltools.orig/paneld/scankey.c	2008-10-30 03:21:24.000000000 +0900
++++ paneltools/paneld/scankey.c	2008-10-30 03:14:25.000000000 +0900
+@@ -51,7 +51,7 @@
+ 		usec += SEC_MICRO;
+ 	}
+ 
+-	return (sec * SEC_MICRO + usec);
++	return sec * SEC_MICRO + usec;
+ }
+ 
+ /*
+diff -ur paneltools.orig/paneld/select_ops.c paneltools/paneld/select_ops.c
+--- paneltools.orig/paneld/select_ops.c	2003-03-04 07:06:04.000000000 +0900
++++ paneltools/paneld/select_ops.c	2008-10-30 03:15:27.000000000 +0900
+@@ -36,12 +36,14 @@
+ static int
+ selmenu_next(struct menu *m)
+ {
++
+ 	return E_NEXT;
+ }
+ 
+ static int
+ selmenu_prev(struct menu *m)
+ {
++
+ 	return E_PREV;
+ }
+ 
+@@ -67,7 +69,8 @@
+ 
+ 			window->set_focus(mcur);
+ 
+-			switch( (err = enter_menu(m))) {
++			err = enter_menu(m);
++			switch (err) {
+ 			case E_OK:
+ 				break;
+ 			case E_NEXT:
+@@ -93,7 +96,7 @@
+ 	return E_OK;
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_select_ops(void)
+ {
+ 	static struct menu_ops sel_ops = {
+@@ -104,5 +107,6 @@
+ 		selmenu_select,
+ 		none_allocbuf
+ 	};
++
+ 	return &sel_ops;
+ }
+diff -ur paneltools.orig/paneld/sequence_ops.c paneltools/paneld/sequence_ops.c
+--- paneltools.orig/paneld/sequence_ops.c	2003-03-04 07:06:06.000000000 +0900
++++ paneltools/paneld/sequence_ops.c	2008-10-30 03:15:47.000000000 +0900
+@@ -44,7 +44,7 @@
+ 
+ 	if (window->set_title(m->nm) == E_OK) {
+ 		int err;
+-		for (;mcur != NULL; mcur = mcur->next) {
++		for (; mcur != NULL; mcur = mcur->next) {
+ 			err = mcur->ops->select(mcur);
+ 			if ((err != E_OK) && (err != E_SELECT))
+ 				break;
+@@ -55,7 +55,7 @@
+ 	return E_OK;
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_sequence_ops(void)
+ {
+ 	static struct menu_ops seq_ops = {
+@@ -66,5 +66,6 @@
+ 		seqmenu_select,
+ 		none_allocbuf
+ 	};
++
+ 	return &seq_ops;
+ }
+diff -ur paneltools.orig/paneld/text_ops.c paneltools/paneld/text_ops.c
+--- paneltools.orig/paneld/text_ops.c	2003-03-04 07:06:09.000000000 +0900
++++ paneltools/paneld/text_ops.c	2008-10-30 03:16:32.000000000 +0900
+@@ -39,12 +39,13 @@
+ static int	text_inc(struct menu *m);
+ static int	text_dec(struct menu *m);
+ static int	text_select(struct menu *m);
+-static char*	text_allocbuf(int *sz);
++static char	*text_allocbuf(int *sz);
+ 
+ static int
+ text_open(struct menu *m)
+ {
+ 	int len;
++
+ 	if (exec_read(m) != E_OK)
+ 		return E_IO;
+ 	len = strlen(m->io.buf);
+@@ -60,6 +61,7 @@
+ text_close(struct menu *m)
+ {
+ 	char *ptr = m->io.buf + m->io.len - 1;
++
+ 	while (*ptr == ' ')
+ 		ptr--;
+ 	*++ptr = 0;
+@@ -69,12 +71,14 @@
+ static int
+ text_next(struct menu *m)
+ {
++
+ 	return window->edit()->right();
+ }
+ 
+ static int
+ text_prev(struct menu *m)
+ {
++
+ 	return window->edit()->left();
+ }
+ 
+@@ -82,6 +86,7 @@
+ text_inc(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (c > 125)
+ 			return window->edit()->putchr(' ');
+@@ -95,6 +100,7 @@
+ text_dec(struct menu *m)
+ {
+ 	int c;
++
+ 	if (window->edit()->getchr(&c) == E_OK) {
+ 		if (c == ' ')
+ 			return window->edit()->putchr(126);
+@@ -107,6 +113,7 @@
+ static int
+ text_select(struct menu *m)
+ {
++
+ 	if (text_open(m) == E_OK) {
+ 		window->set_title(m->nm);
+ 		window->edit()->setbuf(m->io.buf, ALIGN_ANY);
+@@ -118,13 +125,14 @@
+ 	return E_IO;
+ }
+ 
+-static char*
++static char *
+ text_allocbuf(int *sz)
+ {
+-	return (char*)cf_malloc(*sz + 1);
++
++	return cf_malloc(*sz + 1);
+ }
+ 
+-struct menu_ops*
++struct menu_ops *
+ get_text_ops(void)
+ {
+ 	static struct menu_ops text_ops = {
+@@ -135,5 +143,6 @@
+ 		text_select,
+ 		text_allocbuf
+ 	};
++
+ 	return &text_ops;
+ }
+diff -ur paneltools.orig/paneld/util.c paneltools/paneld/util.c
+--- paneltools.orig/paneld/util.c	2003-03-04 07:06:10.000000000 +0900
++++ paneltools/paneld/util.c	2008-10-30 03:17:14.000000000 +0900
+@@ -63,7 +63,7 @@
+ 			strcpy(prev, ptr);
+ 			ptr = prev;
+ 		}
+-		if ( (ptr = strchr(ptr, sep)) != NULL)
++		if ((ptr = strchr(ptr, sep)) != NULL)
+ 			ptr++;
+ 	}
+ }
+@@ -75,6 +75,7 @@
+ util_intstrip(char *buf)
+ {
+ 	char *ptr;
++
+ 	for (ptr = buf; *ptr == '0'; ptr++)
+ 		;
+ 
+@@ -100,6 +101,7 @@
+  */
+ void util_trace_destroy(void)
+ {
++
+ 	closelog();
+ }
+ 
+diff -ur paneltools.orig/paneld/window.c paneltools/paneld/window.c
+--- paneltools.orig/paneld/window.c	2003-03-25 04:17:35.000000000 +0900
++++ paneltools/paneld/window.c	2008-10-30 03:19:57.000000000 +0900
+@@ -73,6 +73,7 @@
+ static int
+ wnd_clear(void)
+ {
++
+ 	return dev->clear();
+ }
+ 
+@@ -121,13 +122,14 @@
+ static int
+ wnd_1x1_open(struct lcd_dev *dev)
+ {
+-	rect->line = (struct edit_line*)cf_malloc(sizeof(struct edit_line));
++
++	rect->line = cf_malloc(sizeof(struct edit_line));
+ 	memset(rect->line, 0, sizeof(struct edit_line));
+ 
+ 	if (dev->getsize(&rect->width, &rect->height) != E_OK)
+ 		return E_IO;
+ 
+-	rect->line->buf = (char*)cf_malloc(rect->width);
++	rect->line->buf = cf_malloc(rect->width);
+ 	rect->tlen = rect->width / 3;
+ 
+ 	rect->edit_offset = rect->tlen + 2;
+@@ -142,6 +144,7 @@
+ static int
+ wnd_1x1_set_list(struct menu *m)
+ {
++
+ 	dev->cursor(0, 0);
+ 	return E_OK;
+ }
+@@ -150,6 +153,7 @@
+ wnd_1x1_set_focus(struct menu *m)
+ {
+ 	int len;
++
+ 	if (dev->setpos(rect->focus_offset, rect->line->y) != E_OK)
+ 		return E_IO;
+ 
+@@ -168,6 +172,7 @@
+ wnd_1x2_set_focus(struct menu *m)
+ {
+ 	int len;
++
+ 	if (dev->setpos(0, rect->line->y) != E_OK)
+ 		return E_IO;
+ 
+@@ -185,13 +190,13 @@
+ static int
+ wnd_MxN_open(struct lcd_dev *dev)
+ {
+-	rect->line = (struct edit_line*)cf_malloc(sizeof(struct edit_line));
++	rect->line = cf_malloc(sizeof(struct edit_line));
+ 	memset(rect->line, 0, sizeof(struct edit_line));
+ 
+ 	if (dev->getsize(&rect->width, &rect->height) != E_OK)
+ 		return E_IO;
+ 
+-	rect->line->buf = (char*)cf_malloc(rect->width);
++	rect->line->buf = cf_malloc(rect->width);
+ 	rect->tlen = rect->width;
+ 
+ 	rect->edit_offset = 0;
+@@ -246,6 +251,7 @@
+ static int
+ wnd_MxN_set_list(struct menu *m)
+ {
++
+ 	rect->mlist = m;
+ 	rect->mtopmost = m;
+ 	dev->cursor(0, 0);
+@@ -304,7 +310,7 @@
+ 	return wnd_MxN_draw_menu(rect->mtopmost, m);
+ }
+ 
+-struct lcd_window*
++struct lcd_window *
+ window_create(void)
+ {
+ 	static struct lcd_window wnd_1x1_ops = {
+@@ -324,7 +330,7 @@
+ 
+ 	int width, height;
+ 
+-	rect = (struct window_rect*)cf_malloc(sizeof(struct window_rect));
++	rect = cf_malloc(sizeof(struct window_rect));
+ 	memset(rect, 0, sizeof(struct window_rect));
+ 
+ 	if (dev->getsize(&width, &height) == E_OK) {
+@@ -341,6 +347,7 @@
+ void
+ window_destroy(struct lcd_window *w)
+ {
++
+ 	if (w != NULL)
+ 		w->clear();
+ 	dev->cursor(0, 0);
+@@ -460,6 +467,7 @@
+ static int
+ edit_putchr(int c)
+ {
++
+ 	rect->line->visible[rect->line->cursor] = c;
+ 	return dev->putchr(c);
+ }
+@@ -467,6 +475,7 @@
+ static int
+ edit_getchr(int *c)
+ {
++
+ 	if ((c == NULL) || (rect->line->visible == NULL))
+ 		return E_IO;
+ 	*c = rect->line->visible[rect->line->cursor];
+@@ -476,6 +485,7 @@
+ static int
+ edit_getpos(int *x)
+ {
++
+ 	if ((x == NULL) || (rect->line->visible == NULL))
+ 		return E_IO;
+ 	*x = (rect->line->visible - rect->line->text) + rect->line->cursor;
+@@ -485,6 +495,7 @@
+ static int
+ edit_setpos(int x)
+ {
++
+ 	if (edit_recalc_line(rect->line, x) == E_OK)
+ 		return edit_draw_line(rect->line);
+ 	return E_IO;
+@@ -494,6 +505,7 @@
+ edit_left(void)
+ {
+ 	int off = rect->line->visible - rect->line->text + rect->line->cursor;
++
+ 	if (off > 0)
+ 		return edit_setpos(--off);
+ 	return E_OK;
+@@ -503,12 +515,13 @@
+ edit_right(void)
+ {
+ 	int off = rect->line->visible - rect->line->text + rect->line->cursor;
++
+ 	if (off < (strlen(rect->line->text) - 1))
+ 		return edit_setpos(++off);
+ 	return E_OK;
+ }
+ 
+-static struct lcd_edit*
++static struct lcd_edit *
+ get_editor(void)
+ {
+ 	static struct lcd_edit edit_ops = {

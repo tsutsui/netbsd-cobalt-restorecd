@@ -9,28 +9,35 @@ PATCH?=		patch
 FTP?=		ftp
 SH?=		sh
 GZIP?=		gzip
+TOUCH?=		touch
 
 # - use appropriate mirrors mentioned in http://www.NetBSD.org/mirrors/
 # - check daily snapshot status first:
 #    http://releng.NetBSD.org/cgi-bin/builds.cgi
 #   and specify appropriate date directory.
 
+DAILY_DIR?=	200810310002Z
+
 FTP_HOST?=	ftp.NetBSD.org
 #FTP_HOST?=	ftp.jp.NetBSD.org
 #FTP_HOST?=	ftp5.jp.NetBSD.org
-FTP_DIR?=	pub/NetBSD-daily/HEAD/200810280002Z
-
-RSYNC_HOST?=	rsync.NetBSD.org
-RSYNC_DIR?=	NetBSD-daily/HEAD/200810280002Z
-
-#RSYNC_HOST?=	rsync3.jp.NetBSD.org
-#RSYNC_DIR?=	pub/NetBSD-daily/HEAD/200810280002Z
-
-RSYNC_URL?=	rsync://${RSYNC_HOST}/${RSYNC_DIR}
+FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
+#FTP_DIR?=	pub/NetBSD/NetBSD-5.0
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
-# adjuct NCUTDIR by FTP_DIR where you'll get files)
-WGET_NCUTDIR?=	3
+# adjuct NCUTDIR by FTP_DIR where you'll get files
+WGET_NCUTDIR?=	4	# for NetBSD-daily
+#WGET_NCUTDIR?=	3	# for release
+
+RSYNC_HOST?=	rsync.NetBSD.org
+#RSYNC_HOST?=	rsync.jp.NetBSD.org
+RSYNC_PREFIX?=
+
+#RSYNC_HOST?=	rsync3.jp.NetBSD.org
+#RSYNC_PREFIX?=	pub/
+
+RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/HEAD/${DAILY_DIR}
+RSYNC_URL?=	rsync://${RSYNC_HOST}/${RSYNC_DIR}
 
 SOURCESETSDIR=	download/source/sets
 GNUSRCSETS=	${SOURCESETSDIR}/gnusrc.tgz
@@ -44,24 +51,26 @@ all: restorecd
 DONE_FETCH=	.done_fetch
 
 ${DONE_FETCH}:
-#	${MAKE} fetch_wget
-	${MAKE} fetch_rsync
-	touch ${DONE_FETCH}
+	${MAKE} fetch_wget
+#	${MAKE} fetch_rsync
+	${TOUCH} ${DONE_FETCH}
+
+FETCH_LIST?=	restorecd-fetch.lst
 
 fetch_rsync: ${RSYNC}
-	${RSYNC} -va --files-from=restorecd-fetch.lst ${RSYNC_URL} download
+	${RSYNC} -va --files-from=${FETCH_LIST} ${RSYNC_URL} download
 
 fetch_wget: ${WGET}
 	(cd download ; \
 	    ${WGET} --base=${WGET_URL}/ --cut-dirs=${WGET_NCUTDIR} \
 	    --no-host-directories --timestamping --force-directories \
-	    --input-file=../restorecd-fetch.lst)
+	    --input-file=../${FETCH_LIST})
 
 DONE_EXTRACT=	.done_extract
 
 ${DONE_EXTRACT}: ${DONE_FETCH}
 	${MAKE} extract_sets
-	touch ${DONE_EXTRACT}
+	${TOUCH} ${DONE_EXTRACT}
 
 extract_sets: ${ALLSRCSETS}
 	${TAR} -zxf ${GNUSRCSETS}
@@ -73,7 +82,7 @@ DONE_COBALT_TOOLS=	.done_cobalt_tools
 
 ${DONE_COBALT_TOOLS}: ${DONE_EXTRACT}
 	${MAKE} build_cobalt_tools
-	touch ${DONE_COBALT_TOOLS}
+	${TOUCH} ${DONE_COBALT_TOOLS}
 
 build_cobalt_tools:
 	(cd usr/src; \
@@ -92,12 +101,12 @@ DONE_PANELD=	.done_paneld
 
 ${DONE_PANELD}: ${DONE_COBALT_TOOLS}
 	${MAKE} build_paneld
-	touch ${DONE_PANELD}
+	${TOUCH} ${DONE_PANELD}
 
 build_paneld:
-	${TAR} -zxf patch/paneld.tar.gz
-	${PATCH} -d paneltools -p0 < patch/paneld_banner_refresh.diff
-	${PATCH} -p0 < patch/paneld-20080912.diff
+	${TAR} -zxf paneld/paneld.tar.gz
+	${PATCH} -d paneltools -p0 < paneld/paneld_banner_refresh.diff
+	${PATCH} -p0 < paneld/paneld-20081030.diff
 	(cd paneltools/paneld && \
 	    ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
 	    ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt dependall)
@@ -128,14 +137,14 @@ ${RESTORECD_ISO}: ${DONE_PANELD} ${DONE_COBALT_TOOLS}
 	${SH} restorecd server=`pwd`/download \
                client=`pwd`/download \
                source=`pwd`/usr/src  \
-               tooldir=`pwd`/usr/src/tooldir.cobalt -v
+               makefs=`pwd`/usr/src/tooldir.cobalt/bin/nbmakefs -v
 
 clean:
 	rm -f .done_*
 	rm -rf cd.tmp
 
-distclean: clean
-	(cd download && rm -rf *)
+distclean cleandir: clean
+	(cd download && rm -rf cobalt i386 mipsel shared source)
 	rm -rf paneltools
 	# XXX rm -rf complains on removing dir with 0111 permission
 	rm -df usr/src/destdir.cobalt/var/spool/ftp/hidden

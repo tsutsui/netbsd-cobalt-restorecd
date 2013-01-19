@@ -2,8 +2,8 @@
 #
 # Generated from:
 #	NetBSD: MAKEDEV.awk,v 1.20 2008/04/30 13:10:49 martin Exp 
-#	NetBSD: MAKEDEV.tmpl,v 1.109 2008/07/13 15:22:39 apb Exp 
-#	NetBSD: etc.cobalt/MAKEDEV.conf,v 1.7 2008/03/27 15:26:39 tsutsui Exp 
+#	NetBSD: MAKEDEV.tmpl,v 1.113 2008/09/14 13:59:54 jmcneill Exp 
+#	NetBSD: etc.cobalt/MAKEDEV.conf,v 1.9 2008/10/19 04:53:41 tsutsui Exp 
 #
 # Copyright (c) 2003,2007,2008 The NetBSD Foundation, Inc.
 # All rights reserved.
@@ -340,10 +340,9 @@ makedev_main()
 	if $do_create_mfs; then
 		# Count inodes and create mfs file system.
 		# The makedev call merely updates $count_nodes.
-		#count_nodes=0
+		count_nodes=0
 		#$makedev ${1+"$@"}
-		#create_mfs_dev $count_nodes
-		count_nodes=1024
+		$makedev all
 		create_mfs_dev $count_nodes
 		unset count_nodes
 	fi
@@ -462,10 +461,14 @@ all_md)
 	makedev ss0 ss1 uk0 uk1
 	makedev tty00 tty01 tty02 tty03 ttyZ0 ttyZ1
 	makedev isdns
+	makedev music rmidi0 rmidi1
 	makedev scsibus0 scsibus1 scsibus2 scsibus3
 	makedev ses0 ses1 ses2 ses3
+	makedev ld0 ld1 ld2 ld3
 	makedev pci0
 	makedev panel
+	makedev altq
+	makedev nsmb
 	;;
 
 minimal)
@@ -504,9 +507,9 @@ all)
 	makedev gpio gpio0 gpio1 gpio2 gpio3 gpio4 gpio5 gpio6 gpio7
 	makedev pad pad0 pad1 pad2 pad3
 	makedev bthub
-	makedev cfs
 	makedev putter
 	makedev drvctl
+	makedev audio
 	makedev local # do this last
 	;;
 
@@ -536,6 +539,10 @@ pad)
 radio)
 	makedev radio0 radio1
 	lndev radio0 radio
+	;;
+
+video)
+	makedev video0 video1 video2 video3
 	;;
 
 ramdisk)
@@ -886,9 +893,40 @@ cpuctl)
 	mkdev cpuctl c 188 0 666
 	;;
 
+audio*)
+	unit=${i#audio}
+	audio=audio$unit
+	sound=sound$unit
+	mixer=mixer$unit
+	audioctl=audioctl$unit
+	: ${unit:-0}
+	mkdev $sound	c 47 $(($unit + 0))	666
+	mkdev $audio	c 47 $(($unit + 128))	666
+	mkdev $mixer	c 47 $(($unit + 16))	666
+	mkdev $audioctl c 47 $(($unit + 192))	666
+	;;
+
 gpio*)
 	unit=${i#gpio}
 	mkdev gpio$unit c 173 $unit 644
+	;;
+
+rmidi*)
+	unit=${i#rmidi}
+	mkdev rmidi$unit c 48 $unit 666
+	;;
+
+music*)
+	unit=${i#music}
+	: ${unit:-0}
+	mkdev music$unit     c 49 $(($unit + 0))	666
+	mkdev sequencer$unit c 49 $(($unit + 128)) 666
+	;;
+
+video*)
+	unit=${i#video}
+	: ${unit:-0}
+	mkdev video$unit c 193 $unit 666
 	;;
 
 amr*)
@@ -899,6 +937,15 @@ amr*)
 random)
 	mkdev random	c 16 0 444
 	mkdev urandom	c 16 1 644
+	;;
+
+cfs)
+	makedev cfs0
+	;;
+
+cfs*)
+	unit=${i#cfs}
+	mkdev cfs$unit c 50 $unit
 	;;
 
 scsibus*)

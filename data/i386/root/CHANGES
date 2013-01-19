@@ -1,3 +1,36 @@
+[20081101] 4.99.73 -current snapshot update
+================================
+
+Changes:
+--------
+ - use 200801031002Z daily snapshot in Makefile
+   - now i386 GENERIC kernel recognizes CD-ROM as a booted device so that
+     we no longer have to build an i386 server kernel for restorecd
+   - MAKEDEV(8) for cobalt creates more device nodes by default
+ - pull changes from restorecd-4.0.1-20081017:
+   - restorecd now also provides 'rescue' environment which allows remote login
+     without a working localdisk, and the conventional restore operation is
+     now started via paneld menu invoked by holding off the "select" button
+     for two seconds
+   - install netbsd-INSTALL.gz kernel as usr/games/.doug in ext2fs partition
+     for emergency local boot, which is loaded by holding all four cursor
+     buttons on powerup
+   - show proper motd(5) login message
+   - update instructions.txt and cleanup misc scripts
+ - make restorecd also usable for sysinst based install on serial console:
+   - fetch and store all cobalt binaries including kern, games, and xsets
+   - put netbsd-RAMDISK.gz kernel into nfsroot as /netbsd.sysinst,
+     which can be specified on bootloader prompt at the first netboot
+ - adjust fstab(5) in installed system:
+   - mount a boot ext2fs partition by default
+   - add entries for procfs, kernfs and ptyfs to default fstab(5)
+ - fix paneld(8) to create a pidfile so that "/etc/rc.d/paneld restart"
+   via rc.d(8) works properly
+ - fix named(8) settings to use chroot environment so that it won't complain
+   "the working directory is not writable"
+ - change dhcpd.conf(5) to use ddns-update-style none to avoid warnings
+ - also tweak MAKEDEV(8) for cobalt netboot
+
 [20081008] 4.99.72 -current snapshot update
 ================================
 
