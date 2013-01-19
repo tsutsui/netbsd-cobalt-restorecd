@@ -1,9 +1,9 @@
-[20081101] 4.99.73 -current snapshot update
+[20081104] first cut at 5.0_BETA
 ================================
 
 Changes:
 --------
- - use 200801031002Z daily snapshot in Makefile
+ - use 200801103002Z daily netbsd-5 snapshot in Makefile
    - now i386 GENERIC kernel recognizes CD-ROM as a booted device so that
      we no longer have to build an i386 server kernel for restorecd
    - MAKEDEV(8) for cobalt creates more device nodes by default
@@ -30,6 +30,7 @@ Changes:
    "the working directory is not writable"
  - change dhcpd.conf(5) to use ddns-update-style none to avoid warnings
  - also tweak MAKEDEV(8) for cobalt netboot
+ - misc updates for restorecd and install-core.sh scripts
 
 [20081008] 4.99.72 -current snapshot update
 ================================

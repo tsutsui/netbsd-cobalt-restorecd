@@ -17,14 +17,15 @@ Typical 'restorecd' script invocation:
  and specify appropriate date directory.
 
 with rsync:
+% mkdir -p download
 % rsync -va --files-from=restorecd-fetch.lst \
-    rsync://rsync.NetBSD.org/NetBSD-daily/HEAD/20081030002Z download
+    rsync://rsync.NetBSD.org/NetBSD-daily/netbsd-5/[snapshot-date] download
 
 with wget:
-% (cd download ; \
-  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD-daily/HEAD/200810300002Z/ \
-  --no-host-directories --cut-dirs=3 --timestamping --force-directories \
-  --input-file=../restorecd-fetch.lst)
+% mkdir -p download
+% wget --base=ftp://ftp.NetBSD.org/pub/NetBSD-daily/netbsd-5/[snapshot-date]/ \
+  --no-host-directories --cut-dirs=4 --timestamping --force-directories \
+  --directory-prefix=download --input-file=restorecd-fetch.lst)
 
   (NOTE adjuct --cut-dirs=N by which directory you'll get files)
 
@@ -49,15 +50,15 @@ with wget:
 % (cd usr/src; \
    tooldir.cobalt/bin/nbmake-cobalt do-distrib-dirs)
 % (cd usr/src/destdir.cobalt; \
-    tar zxpf ../../../download/cobalt/binary/sets/base.tgz)
+    tar -zxpf ../../../download/cobalt/binary/sets/base.tgz)
 % (cd usr/src/destdir.cobalt; \
-    tar zxpf ../../../download/cobalt/binary/sets/comp.tgz)
+    tar -zxpf ../../../download/cobalt/binary/sets/comp.tgz)
 
 2a-(2) build paneld(8) binaries
 
 % tar zxf patch/paneld.tar.gz
 % patch -d paneltools -p0 < download/paneld_banner_refresh.diff
-% patch -p0 < patch/paneld-20080912.diff
+% patch -p0 < patch/paneld-20081030.diff
 
 % (cd paneltools/paneld && \
    ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
