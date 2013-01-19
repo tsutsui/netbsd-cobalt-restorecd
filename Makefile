@@ -22,8 +22,8 @@ TOUCH?=		touch
 #	http://releng.NetBSD.org/cgi-bin/builds.cgi
 #    and specify appropriate date directory.
 
-FTP_HOST?=	ftp.NetBSD.org
-#FTP_HOST=	ftp.jp.NetBSD.org
+#FTP_HOST?=	ftp.NetBSD.org
+FTP_HOST=	ftp.jp.NetBSD.org
 #FTP_HOST=	ftp7.jp.NetBSD.org
 
 #DAILY_DIR?=	201011130000Z
@@ -97,6 +97,7 @@ ${DONE_COBALT_TOOLS}: ${DONE_EXTRACT}
 	${TOUCH} ${DONE_COBALT_TOOLS}
 
 build_cobalt_tools:
+	${PATCH} -d usr/src -p0 < makefs.diff
 	(cd usr/src; \
 	    ${SH} build.sh -m cobalt -u -U \
 	    -T tooldir.cobalt -D destdir.cobalt \
