@@ -1,3 +1,12 @@
+[20090417] 5.0_RC4
+================================
+
+Changes:
+--------
+ - use 200904142015Z netbsd-5-0-RC4 snapshot in Makefile
+   (via pub/NetBSD/NetBSD-5.0_RC4 symlink)
+ - adjust spec files for permissions on iso
+
 [20090228] updated 5.0_RC2 with wapbl fixes etc.
 ================================
 
