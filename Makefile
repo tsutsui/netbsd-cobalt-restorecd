@@ -5,8 +5,8 @@ WGET?=		/usr/pkg/bin/wget
 #WGET=		/usr/local/bin/wget
 
 RSYNC?= 	/usr/pkg/bin/rsync
-#RSYNC= 	/usr/bin/rsync
-#RSYNC= 	/usr/local/bin/rsync
+#RSYNC=		/usr/bin/rsync
+#RSYNC=		/usr/local/bin/rsync
 
 TAR?=		tar
 PATCH?=		patch
@@ -26,7 +26,7 @@ FTP_HOST?=	ftp.NetBSD.org
 #FTP_HOST=	ftp.jp.NetBSD.org
 #FTP_HOST=	ftp5.jp.NetBSD.org
 
-DAILY_DIR?=	200811160002Z
+DAILY_DIR?=	200812020002Z
 #FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
 FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD/NetBSD-5.0

@@ -290,7 +290,7 @@ install_files()
 
 	# Fix permissions
 	$CHMOD 755 /mnt/var
-	$CHMOD 4777 /mnt/tmp
+	$CHMOD 1777 /mnt/tmp
 
 	$UMOUNT /mnt/tmp
 	$UMOUNT /mnt/var

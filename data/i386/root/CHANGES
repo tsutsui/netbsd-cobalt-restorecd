@@ -1,3 +1,13 @@
+[20081203] minor fixes
+================================
+
+Changes:
+--------
+ - use 200812020002Z daily netbsd-5 snapshot in Makefile
+ - fix /tmp permission created by install-core.sh script
+ - mention updated Restore CD HOWTO page
+   http://www.NetBSD.org/ports/cobalt/restorecd-howto.html
+
 [20081117] minor updates
 ================================
 

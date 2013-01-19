@@ -1,3 +1,7 @@
+See "NetBSD/cobalt Restore CD HOWTO" page for updated info:
+http://www.netbsd.org/ports/cobalt/restorecd-howto.html
+
+---
 Typical 'restorecd' script invocation:
 
 0. fetch and extract newer restorecd-*.tar.gz

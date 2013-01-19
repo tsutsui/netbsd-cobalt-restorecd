@@ -7,6 +7,9 @@ Welcome to the NetBSD/cobalt installation.
 
 This file is brought to you by 'less', press <space> to read more.
 
+Please also refer "NetBSD/cobalt Restore CD HOWTO" page for updated info.
+http://www.NetBSD.org/ports/cobalt/restorecd-howto.html
+
 ===========================
 Minimum System Requirements
 ===========================
