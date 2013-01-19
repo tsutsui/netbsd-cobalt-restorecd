@@ -1,9 +1,18 @@
+[20081117] minor updates
+================================
+
+Changes:
+--------
+ - use 200811160002Z daily netbsd-5 snapshot in Makefile
+ - fix restorecd script to make it work even on Cygwin
+ - fix and update misc descriptions in instruction.txt
+
 [20081104] first cut at 5.0_BETA
 ================================
 
 Changes:
 --------
- - use 200801103002Z daily netbsd-5 snapshot in Makefile
+ - use 200811030002Z daily netbsd-5 snapshot in Makefile
    - now i386 GENERIC kernel recognizes CD-ROM as a booted device so that
      we no longer have to build an i386 server kernel for restorecd
    - MAKEDEV(8) for cobalt creates more device nodes by default

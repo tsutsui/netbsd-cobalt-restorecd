@@ -11,12 +11,17 @@ This file is brought to you by 'less', press <space> to read more.
 Minimum System Requirements
 ===========================
 
-Intel-Compatible PC Desktop or Laptop with
+The target system should be a MIPS-based Cobalt server appliance.
+
+To assist in the installation, you need an Intel-Compatible PC Desktop
+or Laptop with
 
  - IDE (ATAPI) or SCSI CD-ROM
  - At least one network card
 
-Computer MUST be CD-ROM-bootable.
+This computer MUST be CD-ROM-bootable.  The hard drive of the PC will
+not be disturbed, but the machine will need to be rebooted from the
+CD-ROM as part of the installation.
 
 ========================
 Installation Limitations
@@ -26,6 +31,21 @@ Please note that this restore CD is targetted at Cobalt MIPS-based appliances
 and clones (e.g. Gateway Microserver).  Intel-based server appliances cannot
 be installed using this CD-ROM.
 
+=====================
+Installation Overview
+=====================
+
+The installation instructions below will in order perform the
+following steps:
+
+ o Boot the assisting PC from the Restore CD.  This will enable a dhcp
+   server on the PC and other services which the server appliance will
+   need during installation.
+ o (re)boot the Cobalt server appliance in a state where it is
+   prepared to retreive the restore CD contents
+ o Re-initialize the Cobalt server appliance from the assisting PC's
+   restore CD
+
 =========================
 Installation Instructions
 =========================
@@ -34,45 +54,83 @@ Warning: THIS INSTALLATION WILL DESTROY THE EXISTING CONTENTS OF THE SERVER
 APPLIANCE'S HARD DRIVE.  Ensure you have sufficient backups before starting
 the installation.
 
+Note: restorecd doesn't use harddisk on the i386 server at all.
+
 1.	Connect this computer to the server appliance using either a crossover
 	cable or hub/switch.
 
-2.	Turn on the server appliance while simultaneously pressing and holding
+2.      Check your i386 server's manuals to see how to boot from
+        its CDROM drive, then boot it from the Restore CD.
+
+        If you are reading this message on your i386 server during boot,
+        it has aready done of cource.
+
+3.	Turn on the server appliance while simultaneously pressing and holding
 	down both the left (<) and right (>) arrow buttons on the LCD console.
 
-3.	Continue holding down both the left (<) and right (>) arrow buttons
+4.	Continue holding down both the left (<) and right (>) arrow buttons
 	until "Net Booting" appears on the LCD display, then release the
 	buttons.
 
-4.	Wait until the box reboots.  If it's ready, "restorecd ready" message
-	and IP address should appear on the LCD screen.
-	If you need remote login access for recovery without restoreing,
-	you can login your cobalt at this point.
-	To start restorecd operation, push and hold the "Select" button,
-	select "Restore" menu, and select [Y] and execute to
-	start installation.
+5.	Wait until the box boots up.  If it's ready, "restorecd ready" message
+	and IP address assigned by the i386 server appears on the LCD screen.
 
-5.	Wait until the box reboots again.
+	If you need remote login access for recovery without restoring,
+	you can login to your cobalt at this point.
+
+6.	To start restorecd operation, push and hold the "Select" button
+        for two seconds, select "Restore" menu by the Select button,
+        select [Y] (which is default) by the arrow buttons, and then
+        push the "Execute" button to start installation.
+
+Warning: again, whole disk contents on the cobalt appliance will be destroyed
+         once installation is started.
+
 	The installation process will be shown on the LCD.
+
+Warning: Please note that the installation process may take a while.
+         Do not interrupt it until it is finished.
+
+7.	Once all parts of the installation are complete, the cobalt box
+        will be rebooted automatically. Wait until the box reboots again.
 	Finally, the box host name and IP address should appear
 	on the LCD screen.  This indicates installation success.
 
-Warning: Please note that the installation process may take a while.  Do not
-interrupt it until it is finished.
+8.	BE AWARE that a newly installed box is left in a highly insecure state.
 
-Warning: A freshly installed box is configured as a DHCP client i.e. it tries
-to obtain its IP address over the network from a DHCP server.  To disable
-this, change /etc/rc.conf to contain "dhclient=NO" line.
-
-6.	BE AWARE that a newly installed box is left in a highly insecure state.
 	All ttys are open by default and allow root access over the network.
 	Also, telnet and rlogin ports are open.  This is done to allow you
 	to login into the fresh box in order to make necessary configuration
-	changes.  Please do not forget to bring your box to a secure state.
+	changes.
 
-7.	type 'man afterboot' and start reading :)  Some of the information is
-	not applicable to the cobalt architecture, but will give you some
+        Please do not forget to bring your cobalt appliance to a secure state
+        before connecting it to an open network:
+
+          * set root password by passwd(1)
+          * remove all pseudo terminal (tty[pqrs]?) lines from /etc/ttys,
+            or remove "secure" field from such pseudo terminals
+          * comment out telnet and rlogin lines in /etc/inetd.conf
+            if you don't really want to enable those services by default
+            (it might be better to use sshd(8))
+          * add new users with user(8) etc.
+          * put users who need root access via su(1) in the "wheel" group
+            by editing the /etc/group file
+
+        See the afterboot(8) man page for more details.
+
+9.	Check afterboot(8) man page by typing "man afterboot".
+        Some of the information is not applicable
+        to the cobalt architecture, but will give you some
 	background information on configuring NetBSD in general.
+
+        The NetBSD Guide http://www.NetBSD.org/docs/guide/en/index.html
+        also provides helpful information.
+
+Warning: A freshly installed box is configured as a DHCP client
+         i.e. it tries to obtain its IP address over the network from a DHCP
+         server, for initial setup with the i386 server running restorecd.
+         To disable this after your own settings are compilete,
+         change /etc/rc.conf to contain "dhclient=NO" line.
 
 This file is permanently available as /root/instructions.txt on this restore
 CD.
@@ -109,13 +167,13 @@ A: Please report this to port-cobalt@NetBSD.org.  In the meantime, use the
 
    - Connect a PC or terminal to the appliance's serial port (115200 8N1)
    - Reboot or power-cycle the box
-   - When Cobalt's banner "We serve it, you surf it" appears, hit space bar
+   - When the Cobalt's banner "We serve it, you surf it" appears, hit space bar
    - In PROM console, type
 
 	bfd /boot/netbsd-INSTALL.gz
 
-   - When kernel is booted, login as root, mount /dev/wd0e partition and set
-     up all vmlinux* links to point to boot.gz:
+   - When the kernel is booted, login as root, mount /dev/wd0e partition and
+     set up all vmlinux* links to point to boot.gz:
 
 	# mount /dev/wd0e /mnt
 	# cd /mnt/boot
@@ -141,6 +199,9 @@ NetBSD/cobalt port page
 NetBSD/cobalt FAQ
 	http://www.NetBSD.org/ports/cobalt/faq.html
 
+The NetBSD Guide
+	http://www.NetBSD.org/docs/guide/en/
+
 general instructions on configuring a fresh NetBSD install
 	man afterboot
 
@@ -164,3 +225,5 @@ Dennis Chernoivanov -- for creating the initial NetBSD restorecd script and
 writing paneld utility.
 
 Nolan Leake -- for providing the periodic banner refresh patch for paneld
+
+Havard Eidnes -- for improving this instructions.txt document

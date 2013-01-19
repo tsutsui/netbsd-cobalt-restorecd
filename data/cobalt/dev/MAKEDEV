@@ -2,8 +2,8 @@
 #
 # Generated from:
 #	NetBSD: MAKEDEV.awk,v 1.20 2008/04/30 13:10:49 martin Exp 
-#	NetBSD: MAKEDEV.tmpl,v 1.113 2008/09/14 13:59:54 jmcneill Exp 
-#	NetBSD: etc.cobalt/MAKEDEV.conf,v 1.9 2008/10/19 04:53:41 tsutsui Exp 
+#	NetBSD: MAKEDEV.tmpl,v 1.113.2.3 2008/11/14 02:52:01 snj Exp 
+#	NetBSD: etc.cobalt/MAKEDEV.conf,v 1.9.2.3 2008/11/15 03:21:03 snj Exp 
 #
 # Copyright (c) 2003,2007,2008 The NetBSD Foundation, Inc.
 # All rights reserved.
@@ -341,7 +341,7 @@ makedev_main()
 		# Count inodes and create mfs file system.
 		# The makedev call merely updates $count_nodes.
 		count_nodes=0
-		#$makedev ${1+"$@"}
+#		$makedev ${1+"$@"}
 		$makedev all
 		create_mfs_dev $count_nodes
 		unset count_nodes
@@ -461,10 +461,12 @@ all_md)
 	makedev ss0 ss1 uk0 uk1
 	makedev tty00 tty01 tty02 tty03 ttyZ0 ttyZ1
 	makedev isdns
+	makedev audio
 	makedev music rmidi0 rmidi1
 	makedev scsibus0 scsibus1 scsibus2 scsibus3
 	makedev ses0 ses1 ses2 ses3
 	makedev ld0 ld1 ld2 ld3
+	makedev usbs
 	makedev pci0
 	makedev panel
 	makedev altq
@@ -476,6 +478,7 @@ minimal)
 	makedev sd0 sd1 sd2 sd3 opty st0 st1 ch0 cd0 cd1 ccd0 ccd1 md0
 	makedev wd0 wd1
 	makedev tty00 ttyZ0
+	makedev bpf
 	;;
 
 tty[0-9]|tty0[0-9])
@@ -509,7 +512,7 @@ all)
 	makedev bthub
 	makedev putter
 	makedev drvctl
-	makedev audio
+	makedev video
 	makedev local # do this last
 	;;
 

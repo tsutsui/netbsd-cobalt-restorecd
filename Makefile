@@ -1,10 +1,12 @@
 # sample Makefile to describe "how to build restorecd"
 
 WGET?=		/usr/pkg/bin/wget
-#WGET?=		/usr/local/bin/wget
+#WGET=		/usr/bin/wget
+#WGET=		/usr/local/bin/wget
 
 RSYNC?= 	/usr/pkg/bin/rsync
-#RSYNC?= 	/usr/local/bin/rsync
+#RSYNC= 	/usr/bin/rsync
+#RSYNC= 	/usr/local/bin/rsync
 
 TAR?=		tar
 PATCH?=		patch
@@ -20,11 +22,11 @@ TOUCH?=		touch
 #	http://releng.NetBSD.org/cgi-bin/builds.cgi
 #    and specify appropriate date directory.
 
-DAILY_DIR?=	200811030002Z
-
 FTP_HOST?=	ftp.NetBSD.org
-#FTP_HOST?=	ftp.jp.NetBSD.org
-#FTP_HOST?=	ftp5.jp.NetBSD.org
+#FTP_HOST=	ftp.jp.NetBSD.org
+#FTP_HOST=	ftp5.jp.NetBSD.org
+
+DAILY_DIR?=	200811160002Z
 #FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
 FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD/NetBSD-5.0
@@ -35,11 +37,11 @@ WGET_NCUTDIR?=	4	# for NetBSD-daily
 #WGET_NCUTDIR?=	3	# for release
 
 RSYNC_HOST?=	rsync.NetBSD.org
-#RSYNC_HOST?=	rsync.jp.NetBSD.org
+#RSYNC_HOST=	rsync.jp.NetBSD.org
 RSYNC_PREFIX?=
 
-#RSYNC_HOST?=	rsync3.jp.NetBSD.org
-#RSYNC_PREFIX?=	pub/
+#RSYNC_HOST=	rsync3.jp.NetBSD.org
+#RSYNC_PREFIX=	pub/
 
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/HEAD/${DAILY_DIR}
 RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-5/${DAILY_DIR}

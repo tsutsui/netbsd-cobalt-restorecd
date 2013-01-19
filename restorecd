@@ -291,7 +291,7 @@ create_cd()
 	    $_specnfsroot $basedir/data/common/spec.nfsroot > $_specfile
 
 	_bootxx=$_cddir/usr/mdec/bootxx_cd9660
-	"$_makefs" -t cd9660 -F $_specfile -o \
+	"$_makefs" -t cd9660 -F $_specfile -N $_cddir/etc -o \
 	    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot,allow-deep-trees,allow-max-name,allow-multidot \
 	    "$_filename".tmp $_cddir && \
 	    mv "$_filename".tmp "$_filename"
@@ -353,7 +353,7 @@ get_opts()
 bootstrap()
 {
 	find_tools "rm cp mv ln tar mkdir echo dirname pwd basename"
-	find_tools "gzip chmod awk sed dd cat sh touch"
+	find_tools "gzip chmod awk sed dd cat sh"
 
 	# Define basedir very early to make it available to the rest of the
 	# script
