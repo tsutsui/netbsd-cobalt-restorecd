@@ -2,9 +2,9 @@ Typical 'restorecd' script invocation:
 
 1. fetch and extract newer restorecd-*.tar.gz
 
-% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071108.tar.gz
+% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071223.tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20071108.tar.gz
+% tar zxf restorecd-20071223.tar.gz
 % cd restorecd
 
 2. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
@@ -12,11 +12,11 @@ Typical 'restorecd' script invocation:
 
 with rsync:
 % rsync -va --files-from=restorecd-fetch.lst \
-    rsync://rsync.NetBSD.org/NetBSD/NetBSD-4.0_RC4/ download
+    rsync://rsync.NetBSD.org/NetBSD/NetBSD-4.0/ download
 
 with wget:
 % (cd download ; \
-  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-4.0_RC4/ \
+  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-4.0/ \
   --no-host-directories --cut-dirs=3 --timestamping --force-directories \
   --input-file=../restorecd-fetch.lst)
 
@@ -49,6 +49,10 @@ with wget:
 % (cd usr/src; \
    sh build.sh -m cobalt -u -U -T tooldir.cobalt -D destdir.cobalt \
    -V OBJMACHINE=1 tools)
+
+   NOTE1: check your TOOLDIR in the build log here.
+   NOTE2: make sure /etc/mk.conf not to override $TOOLDIR
+
 % (cd usr/src; \
    tooldir.cobalt/bin/nbmake-cobalt do-distrib-dirs)
 % (cd usr/src/destdir.cobalt; \
@@ -63,14 +67,14 @@ with wget:
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
    paneltools/paneld/paneld.conf.5 \
    data/cobalt/install/files/usr/share/man/man5
-% mkdir data/cobalt/install/files/usr/share/man/cat5
+% mkdir -p data/cobalt/install/files/usr/share/man/cat5
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
    paneltools/paneld/obj.cobalt/paneld.conf.cat5 \
    data/cobalt/install/files/usr/share/man/cat5/paneld.conf.0
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
    paneltools/paneld/paneld.8 \
    data/cobalt/install/files/usr/share/man/man8
-% mkdir data/cobalt/install/files/usr/share/man/cat8
+% mkdir -p data/cobalt/install/files/usr/share/man/cat8
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
    paneltools/paneld/obj.cobalt/paneld.cat8 \
    data/cobalt/install/files/usr/share/man/cat8/paneld.0

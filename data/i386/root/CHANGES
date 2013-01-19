@@ -1,4 +1,14 @@
 
+[20071223] Minor updates for official 4.0 Release:
+================================
+
+Fixes:
+------
+
+ - 4.0 release kernel and userland
+ - update README for 4.0
+ - paneld binaries recompiled on 4.0 environment
+
 [20071106] More changes to 4.0 Release:
 ================================
 
@@ -9,7 +19,7 @@ New Features:
  - New netboot capable native bootloader and use GENERIC kernel on bootstrap
 
 Bug fixes and improvements:
-----------
+---------------------------
 
  - Put more details how to create ISO image in README
  - Use usr/mdec/boot directly to create bootable image rather than boot-big.fs
