@@ -2,9 +2,9 @@ Typical 'restorecd' script invocation:
 
 1. fetch and extract newer restorecd-*.tar.gz
 
-% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071223.tar.gz
+% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20071224.tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20071223.tar.gz
+% tar zxf restorecd-20071224.tar.gz
 % cd restorecd
 
 2. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
@@ -37,12 +37,12 @@ with wget:
 
 4a. rebuild paneld binary (if you don't want to use a precompiled binary)
 
-% (cd download; ftp \
-  http://only.mawhrin.net/~cdi/netbsd/cobalt/paneld.tar.gz)
 % (cd download; \
-    ftp http://www.sigbus.net/paneld_banner_refresh.diff)
+    ftp http://only.mawhrin.net/~cdi/netbsd/cobalt/paneld.tar.gz)
 % (cd download; \
-    ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/paneld-20071105.diff)
+   ftp http://www.sigbus.net/paneld_banner_refresh.diff)
+% (cd download; \
+   ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/paneld-20071105.diff)
 % tar zxf download/paneld.tar.gz
 % patch -d paneltools -p < download/paneld_banner_refresh.diff
 % patch -p < download/paneld-20071105.diff

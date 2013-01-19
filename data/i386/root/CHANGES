@@ -1,5 +1,5 @@
 
-[20071223] Minor updates for official 4.0 Release:
+[20071224] Minor updates for official 4.0 Release:
 ================================
 
 Fixes:
@@ -8,6 +8,7 @@ Fixes:
  - 4.0 release kernel and userland
  - update README for 4.0
  - paneld binaries recompiled on 4.0 environment
+ - add symlinks to CHANGES and instructions.txt
 
 [20071106] More changes to 4.0 Release:
 ================================
