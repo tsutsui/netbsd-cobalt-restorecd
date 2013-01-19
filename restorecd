@@ -340,7 +340,7 @@ create_cd()
 	$cat $_cddir/etc/mtree/set.base  $_cddir/etc/mtree/set.etc | \
 	    $sed -e 's,^\./var,./altvar,' > $_specroot
 	$cat ${_specfile}.root | \
-	    $sed -e 's,^\./,./nfsroot/,' >> $_specnfsroot
+	    $sed -e 's,^\./,./nfsroot/,' > $_specnfsroot
 	$cat $basedir/data/common/spec.root $_specroot \
 	    $_specnfsroot $basedir/data/common/spec.etc > $_specfile
 

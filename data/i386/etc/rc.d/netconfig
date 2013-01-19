@@ -19,6 +19,9 @@ for i in `/sbin/ifconfig -l`; do
 		ppp*)
 		;;
 
+		fwip*)
+		;;
+
 		*)
 		echo "Found interface $i"
 		/sbin/ifconfig $i 10.0.0.254

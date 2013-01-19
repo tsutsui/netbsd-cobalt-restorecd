@@ -10,17 +10,22 @@ FTP?=		ftp
 SH?=		sh
 GZIP?=		gzip
 
-# use appropriate mirrors mentioned in http://www.NetBSD.org/mirrors/
+# - use appropriate mirrors mentioned in http://www.NetBSD.org/mirrors/
+# - check daily snapshot status first:
+#    http://releng.NetBSD.org/cgi-bin/builds.cgi
+#   and specify appropriate date directory.
+
 FTP_HOST?=	ftp.NetBSD.org
 #FTP_HOST?=	ftp.jp.NetBSD.org
 #FTP_HOST?=	ftp5.jp.NetBSD.org
-FTP_DIR?=	pub/NetBSD/NetBSD-4.0
+FTP_DIR?=	pub/NetBSD-daily/HEAD/200809100002Z
 
-#RSYNC_HOST?=	rsync.NetBSD.org
-#RSYNC_DIR?=	NetBSD/NetBSD-4.0
-RSYNC_DIR?=	pub/NetBSD-daily/HEAD/200809100002Z
-RSYNC_HOST?=	rsync3.jp.NetBSD.org
-#RSYNC_DIR?=	pub/NetBSD/NetBSD-4.0
+RSYNC_HOST?=	rsync.NetBSD.org
+RSYNC_DIR?=	NetBSD-daily/HEAD/200809100002Z
+
+#RSYNC_HOST?=	rsync3.jp.NetBSD.org
+#RSYNC_DIR?=	pub/NetBSD-daily/HEAD/200809100002Z
+
 RSYNC_URL?=	rsync://${RSYNC_HOST}/${RSYNC_DIR}
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
@@ -59,10 +64,11 @@ ${DONE_EXTRACT}: ${DONE_FETCH}
 	touch ${DONE_EXTRACT}
 
 extract_sets: ${ALLSRCSETS}
-	${TAR} -zxf ${GNUSRCSETS}
-	${TAR} -zxf ${SHARESRCSETS}
-	${TAR} -zxf ${SRCSETS}
-	${TAR} -zxf ${SYSSRCSETS}
+	${TAR} -zxpf ${GNUSRCSETS}
+	${TAR} -zxpf ${SHARESRCSETS}
+	${TAR} -zxpf ${SRCSETS}
+	${TAR} -zxpf ${SYSSRCSETS}
+	chmod +x usr/src/dist/file/install-sh	# XXX
 
 DONE_COBALT_TOOLS=	.done_cobalt_tools
 
@@ -92,7 +98,7 @@ ${DONE_PANELD}: ${DONE_COBALT_TOOLS}
 build_paneld:
 	${TAR} -zxf patch/paneld.tar.gz
 	${PATCH} -d paneltools -p < patch/paneld_banner_refresh.diff
-	${PATCH} -p < patch/paneld-20071105.diff
+	${PATCH} -p < patch/paneld-20080912.diff
 	(cd paneltools/paneld && \
 	    ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
 	    ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt dependall)

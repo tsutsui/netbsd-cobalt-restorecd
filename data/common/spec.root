@@ -1,3 +1,5 @@
+/set uname=root gname=wheel
+
 . type=dir uname=root gname=wheel mode=0755
 ./boot type=file uname=root gname=wheel mode=0444
 ./home type=dir uname=root gname=wheel mode=0755

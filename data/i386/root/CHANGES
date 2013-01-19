@@ -1,10 +1,23 @@
-[20080910] 4.99.72 current snapshot
+[20080912] 4.99.72 -current snapshot
 ================================
 
 Changes:
 --------
- - use 200809100002Z daily snapshot
- - disable postfix(8) on i386 server
+ - use 200809100002Z daily snapshot in Makefile
+ - update misc scripts for recent -current:
+  for cobalt installation:
+   - include paneld(8) sources and patches and fix one warning
+   - enable wapbl(4) (ffs journaling) in fstab(5)
+   - use raw devices for newfs(8)
+   - don't run rc.d/sysdb
+   - use default GENERIC kernel
+   - use default fdisk(8) binary
+   - use default newfs_ext2fs(8) binary
+   - use default bootloader (which prints boot messages to LCD)
+  for i386 server:
+   - ignore fwip(4) interface
+   - don't start postfix(8)
+   - prepare stripped etc/services to avoid /var overflow
 
 [20080511] Script improvements for easy build
 ================================

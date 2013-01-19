@@ -33,10 +33,14 @@ INST_TARBALLS="base.tgz comp.tgz etc.tgz man.tgz misc.tgz text.tgz"
 DISK=/dev/wd0
 
 ALTROOT_DEV=/dev/wd0e
+ALTROOT_RDEV=/dev/rwd0e
 ROOT_DEV=/dev/wd0a
+ROOT_RDEV=/dev/rwd0a
 SWAP_DEV=/dev/wd0b
 VAR_DEV=/dev/wd0f
+VAR_RDEV=/dev/rwd0f
 TMP_DEV=/dev/wd0g
+TMP_RDEV=/dev/rwd0g
 
 MOUNT_FFS_OPT="-o async"
 

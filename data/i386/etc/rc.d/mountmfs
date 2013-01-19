@@ -17,15 +17,7 @@ mountmfs_start()
 {
 	PWD=`/bin/pwd`
 
-	cd /dev
-#	/usr/bin/gzip -cd /dev/dev.tgz | /usr/bin/tar pxf -
-
-#	echo "Creating /dev..."
-#	/bin/sh ./MAKEDEV all >/dev/null 2>&1
-
-	# It will barf about /dev being used. Oh well.
-	umount -a >/dev/null 2>&1
-	mount -a -t nonfs >/dev/null 2>&1
+	mount -a -t mfs > /dev/null 2>&1
 	echo "Copying /altvar -> /var"
 	(cd /altvar && /bin/pax -rw -pe * /var)
 

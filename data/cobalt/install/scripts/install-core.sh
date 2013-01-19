@@ -196,16 +196,16 @@ install_disklabel()
 init_filesystems()
 {
 	printmsg "Disk Setup" "Format boot"
-	$NEWFS_EXT2FS -O 0 $ALTROOT_DEV
+	$NEWFS_EXT2FS -O 0 $ALTROOT_RDEV
 
 	printmsg "Disk Setup" "Format /var"
-	$NEWFS $VAR_DEV
+	$NEWFS $VAR_RDEV
 
 	printmsg "Disk Setup" "Format /tmp"
-	$NEWFS $TMP_DEV
+	$NEWFS $TMP_RDEV
 
 	printmsg "Disk Setup" "Format root"
-	$NEWFS $ROOT_DEV
+	$NEWFS $ROOT_RDEV
 }
 
 install_boot()
@@ -287,6 +287,7 @@ install_files()
 do_reboot()
 {
 	printmsg "Installed OK" "Rebooting..."
+	$UMOUNT -a
 	$REBOOT
 }
 

@@ -2,9 +2,9 @@ Typical 'restorecd' script invocation:
 
 0. fetch and extract newer restorecd-*.tar.gz
 
-% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20080511.tar.gz
+% ftp http://www.ceres.dti.ne.jp/~tsutsui/netbsd/restorecd-20080912.tar.gz
     (or from appropriate server)
-% tar zxf restorecd-20080511.tar.gz
+% tar zxf restorecd-20080912.tar.gz
 % cd restorecd
 
   Then just type "make", or try the following procedure:
@@ -12,13 +12,17 @@ Typical 'restorecd' script invocation:
 1. fetch NetBSD binaries and sources (for i386 and cobalt) into download dir
    (use appropriate mirrors)
 
+ Check daily snapshot status:
+  http://releng.NetBSD.org/cgi-bin/builds.cgi
+ and specify appropriate date directory.
+
 with rsync:
 % rsync -va --files-from=restorecd-fetch.lst \
-    rsync://rsync.NetBSD.org/NetBSD/NetBSD-4.0/ download
+    rsync://rsync.NetBSD.org/NetBSD-daily/HEAD/20080910002Z download
 
 with wget:
 % (cd download ; \
-  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD/NetBSD-4.0/ \
+  wget --base=ftp://ftp.NetBSD.org/pub/NetBSD-daily/HEAD/200809100002Z/ \
   --no-host-directories --cut-dirs=3 --timestamping --force-directories \
   --input-file=../restorecd-fetch.lst)
 
@@ -26,13 +30,12 @@ with wget:
 
 2. extract NetBSD sources
 
-% tar zxf download/source/sets/gnusrc.tgz
-% tar zxf download/source/sets/sharesrc.tgz
-% tar zxf download/source/sets/src.tgz
-% tar zxf download/source/sets/syssrc.tgz
+% tar zxpf download/source/sets/gnusrc.tgz
+% tar zxpf download/source/sets/sharesrc.tgz
+% tar zxpf download/source/sets/src.tgz
+% tar zxpf download/source/sets/syssrc.tgz
 
-2a. rebuild paneld(8), backported newfs_ext2fs(8), bug-fixed fdisk(8) binaries
-    (if you don't want to use precompiled binaries)
+2a. rebuild paneld(8)
 
 2a-(1) prepare build environment to make cobalt binaries
 
@@ -52,13 +55,9 @@ with wget:
 
 2a-(2) build paneld(8) binaries
 
-% (cd download; ftp \
-  http://only.mawhrin.net/~cdi/netbsd/cobalt/paneld.tar.gz)
-% (cd download; \
-    ftp http://www.sigbus.net/paneld_banner_refresh.diff)
-% tar zxf download/paneld.tar.gz
+% tar zxf patch/paneld.tar.gz
 % patch -d paneltools -p < download/paneld_banner_refresh.diff
-% patch -p < patch/paneld-20071105.diff
+% patch -p < patch/paneld-20080912.diff
 
 % (cd paneltools/paneld && \
    ../../usr/src/tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
@@ -80,78 +79,14 @@ with wget:
    paneltools/paneld/obj.cobalt/paneld.cat8 \
    data/cobalt/install/files/usr/share/man/cat8/paneld.0
 
-2a-(3) build backported newfs_ext2fs(8)
-
-% tar zxf patch/newfs_ext2fs-4.0.tar.gz
-% (cd usr/src/sbin/newfs_ext2fs && \
-    ../../../../usr/src/tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
-    ../../../../usr/src/tooldir.cobalt/bin/nbmake-cobalt dependall )
-% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 555 \
-   usr/src/sbin/newfs_ext2fs/obj.cobalt/newfs_ext2fs \
-   data/cobalt/sbin
-% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 555 \
-   usr/src/sbin/newfs_ext2fs/obj.cobalt/newfs_ext2fs \
-   data/cobalt/install/files/sbin
-% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
-   usr/src/sbin/newfs_ext2fs/newfs_ext2fs.8 \
-   data/cobalt/install/files/usr/share/man/man8
-% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
-   usr/src/sbin/newfs_ext2fs/obj.cobalt/newfs_ext2fs.cat8 \
-   data/cobalt/install/files/usr/share/man/cat8/newfs_ext2fs.0
-
-2a-(4) build bug-fixed fdisk(8)
-
-% patch -p < patch/fdisk.c-r1.114.diff
-% (cd usr/src/sbin/fdisk && \
-    ../../../../usr/src/tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
-    ../../../../usr/src/tooldir.cobalt/bin/nbmake-cobalt dependall )
-% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 555 \
-   usr/src/sbin/fdisk/obj.cobalt/fdisk data/cobalt/sbin
-% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 555 \
-   usr/src/sbin/fdisk/obj.cobalt/fdisk data/cobalt/install/files/sbin
-
-3. prepare patched GENERIC kernel and bootloader binaries for cobalt
-
-3a. rebuild GENERIC kernel and native boot.gz if you don't want to use
-    precompiled ones (if you don't mind it you can skip this)
-
-(assuming you have built tools on 3a-(1) already)
-% (cd usr/src; patch -p < ../../patch/cobalt-netbsd-4-20080312.diff)
-% (cd usr/src; \
-   sh build.sh -m cobalt -u -U -T tooldir.cobalt -D destdir.cobalt \
-   -V OBJMACHINE=1 kernel=GENERIC)
-% gzip -9c usr/src/sys/arch/cobalt/compile/obj.cobalt/GENERIC/netbsd > \
-    binary/cobalt/netbsd-GENERIC.gz
-% (cd usr/src; \
-   sh build.sh -m cobalt -u -U -T tooldir.cobalt -D destdir.cobalt \
-   -V OBJMACHINE=1 kernel=INSTALL)
-% gzip -9c usr/src/sys/arch/cobalt/compile/obj.cobalt/INSTALL/netbsd > \
-    binary/cobalt/netbsd-INSTALL.gz
-% (cd usr/src/sys/arch/cobalt/stand/boot && \
-    ../../../../../tooldir.cobalt/bin/nbmake-cobalt OBJMACHINE=1 obj && \
-    ../../../../../tooldir.cobalt/bin/nbmake-cobalt dependall )
-% cp usr/src/sys/arch/cobalt/stand/boot/obj.cobalt/boot.gz binary/cobalt/
-
-4. replace binaries in download sets with patched ones
-
-% cp binary/cobalt/netbsd-GENERIC.gz download/cobalt/binary/kernel
-% cp binary/cobalt/netbsd-INSTALL.gz download/cobalt/binary/kernel
-% mkdir usr/mdec
-% zcat binary/cobalt/boot.gz > usr/mdec/boot
-% gunzip download/cobalt/binary/sets/base.tgz
-% tar rf download/cobalt/binary/sets/base.tar ./usr/mdec/boot
-% gzip download/cobalt/binary/sets/base.tar && \
-    mv download/cobalt/binary/sets/base.tar.gz \
-    download/cobalt/binary/sets/base.tgz
-
-5. build tools to build i386 server's kernel and boot image
+3. build tools to build i386 server's kernel and boot image
 
 % (cd usr/src; sh build.sh -m i386 -u -U -T tooldir.i386 -V OBJMACHINE=1 tools)
 
    NOTE1: check your TOOLDIR in the build log here.
    NOTE2: make sure /etc/mk.conf not to override $TOOLDIR
 
-6. execute restorecd script
+4. execute restorecd script
 
 % sh restorecd server=`pwd`/download \
                client=`pwd`/download \

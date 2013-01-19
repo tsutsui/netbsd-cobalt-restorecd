@@ -1,4 +1,4 @@
-/dev/wd0a	/	ffs	rw,softdep	1	1
+/dev/wd0a	/	ffs	rw,log		1	1
 /dev/wd0b	none	swap	sw		0	0
-/dev/wd0f	/var	ffs	rw,softdep	1	2
-/dev/wd0g	/tmp	ffs	rw,softdep	1	2
+/dev/wd0f	/var	ffs	rw,log		1	2
+/dev/wd0g	/tmp	ffs	rw,log		1	2
