@@ -1,3 +1,11 @@
+[20100218] Welcome to 5.0.2
+================================
+
+Changes:
+--------
+ - use NetBSD 5.0.2 release binaries
+ - prepare proper boot.cfg menu on booting i386 server
+
 [20090818] Welcome to 5.0.1
 ================================
 

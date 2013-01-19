@@ -221,12 +221,12 @@ get_version()
 #
 # prepare_cdinstructions <server> <client> <rootdir>
 #	Fix NetBSD version information in already installed
-#	<cdroot>/root/instructions.txt file.
+#	<cdroot>/root/instructions.txt and <cdroot>/boot.cfg files.
 prepare_cdinstructions()
 {
 	_server="$1" ; _client="$2" ; _rootdir="$3"
 
-	log "Fixing instructions.txt..."
+	log "Fixing instructions.txt and boot.cfg..."
 
 	get_version "$_server/i386/binary/sets" "$_rootdir"
 	_root_version=$_version
@@ -239,6 +239,12 @@ prepare_cdinstructions()
 		$sed "s/__REL__/$_root_version/; s/__HREL__/$_nfsroot_version/"\
 			instructions.txt > instructions.txt.1
 		$mv instructions.txt.1 instructions.txt
+	)
+	(
+		cd "$_rootdir"
+		$sed "s/__REL__/$_root_version/; s/__HREL__/$_nfsroot_version/"\
+			boot.cfg > boot.cfg.1
+		$mv boot.cfg.1 boot.cfg
 	)
 }
 

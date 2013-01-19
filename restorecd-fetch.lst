@@ -1,8 +1,5 @@
-cobalt/binary/sets/BSDSUM
-cobalt/binary/sets/CKSUM
 cobalt/binary/sets/MD5
 cobalt/binary/sets/SHA512
-cobalt/binary/sets/SYSVSUM
 cobalt/binary/sets/base.tgz
 cobalt/binary/sets/comp.tgz
 cobalt/binary/sets/etc.tgz
@@ -17,11 +14,8 @@ cobalt/binary/sets/xcomp.tgz
 cobalt/binary/sets/xetc.tgz
 cobalt/binary/sets/xfont.tgz
 cobalt/binary/sets/xserver.tgz
-cobalt/binary/kernel/BSDSUM
-cobalt/binary/kernel/CKSUM
 cobalt/binary/kernel/MD5
 cobalt/binary/kernel/SHA512
-cobalt/binary/kernel/SYSVSUM
 cobalt/binary/kernel/netbsd-GENERIC.gz
 cobalt/binary/kernel/netbsd-INSTALL.gz
 cobalt/binary/kernel/netbsd-RAMDISK.gz
