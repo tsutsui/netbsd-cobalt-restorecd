@@ -26,12 +26,12 @@ TOUCH?=		touch
 #FTP_HOST=	ftp.jp.NetBSD.org
 FTP_HOST=	ftp7.jp.NetBSD.org
 
-#DAILY_DIR?=	201201010000Z
+#DAILY_DIR?=	2013010181120Z
 #FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD/NetBSD-5.0
 #FTP_DIR?=	pub/NetBSD/NetBSD-5.1
-FTP_DIR?=	pub/NetBSD/NetBSD-5.2
+FTP_DIR?=	pub/NetBSD/NetBSD-5.2.1
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
 # adjuct NCUTDIR by FTP_DIR where you'll get files
@@ -49,7 +49,7 @@ RSYNC_PREFIX?=
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-5/${DAILY_DIR}
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.0
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.1
-RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.2
+RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.2.1
 RSYNC_URL?=	rsync://${RSYNC_HOST}/${RSYNC_DIR}
 
 DOWNLOADDIR=	download
