@@ -624,7 +624,7 @@ all)
 
 init)
 	# prepare minimum devices for restorecd script
-	makedev std wd0 md0 tty00 ttyZ0 panel
+	makedev std ptm wd0 md0 tty00 ttyZ0 panel
 	;;
 
 audio)
