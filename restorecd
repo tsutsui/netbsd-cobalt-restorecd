@@ -320,7 +320,7 @@ create_cd()
 		log "Building restorecd complete."
 	fi
 	if [ "$_media" = "usb" ]; then
-		FSSIZE=`expr 512 \* 1000 \* 1000`
+		FSSIZE=`expr 600 \* 1024 \* 1024`
 		FSSECTORS=`expr ${FSSIZE} / 512`
 		HEADS=64
 		SECTORS=32
@@ -363,9 +363,7 @@ a:    ${FSSECTORS} 0 4.2BSD ${FRAGSIZE} ${BLOCKSIZE} 128
 c:    ${FSSECTORS} 0 unused 0 0
 d:    ${FSSECTORS} 0 unused 0 0
 EOF
-		# XXX we have not built tools nbdisklabel-i386 here,
-		# XXX but cobalt has a compatible label...
-		"$_tooldir"/bin/nbdisklabel-cobalt -R -F "$_filename".tmp $_labelproto
+		"$_tooldir"/bin/nbdisklabel -M i386 -R -F "$_filename".tmp $_labelproto
 		mv "$_filename".tmp "$_filename"
 		log "Building restoreusb complete."
 

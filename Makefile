@@ -29,9 +29,7 @@ FTP_HOST=	ftp7.jp.NetBSD.org
 #DAILY_DIR?=	201401261230Z
 #FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
-#FTP_DIR?=	pub/NetBSD/NetBSD-5.0
-#FTP_DIR?=	pub/NetBSD/NetBSD-5.1
-FTP_DIR?=	pub/NetBSD/NetBSD-5.2.2
+FTP_DIR?=	pub/NetBSD/NetBSD-7.1.1
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
 # adjuct NCUTDIR by FTP_DIR where you'll get files
@@ -46,10 +44,8 @@ RSYNC_PREFIX?=
 #RSYNC_PREFIX=	pub/
 
 #RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/HEAD/${DAILY_DIR}
-#RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-5/${DAILY_DIR}
-#RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.0
-#RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.1
-RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-5.2.2
+#RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD-daily/netbsd-7/${DAILY_DIR}
+RSYNC_DIR?=	${RSYNC_PREFIX}NetBSD/NetBSD-7.1.1
 RSYNC_URL?=	rsync://${RSYNC_HOST}/${RSYNC_DIR}
 
 DOWNLOADDIR=	download
@@ -134,14 +130,8 @@ build_paneld:
 	    paneltools/paneld/paneld.conf.5 \
 	    data/cobalt/install/files/usr/share/man/man5
 	usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
-	    paneltools/paneld/obj.cobalt/paneld.conf.cat5 \
-	    data/cobalt/install/files/usr/share/man/cat5/paneld.conf.0
-	usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
 	   paneltools/paneld/paneld.8 \
 	   data/cobalt/install/files/usr/share/man/man8
-	usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
-	    paneltools/paneld/obj.cobalt/paneld.cat8 \
-	    data/cobalt/install/files/usr/share/man/cat8/paneld.0
 
 RESTORECD_ISO=	cd.tmp/restorecd.iso
 
@@ -153,7 +143,7 @@ ${RESTORECD_ISO}: ${DONE_PANELD} ${DONE_COBALT_TOOLS}
                source=`pwd`/usr/src  \
                tooldir=`pwd`/usr/src/tooldir.cobalt media=cd -v
 
-RESTOREUSB_IMG=	usb.tmp/restorecd.img
+RESTOREUSB_IMG=	usb.tmp/restoreusb.img
 
 restoreusb: ${RESTOREUSB_IMG}
 

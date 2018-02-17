@@ -29,7 +29,7 @@ INSTALL_CORE=/install/scripts/install-core.sh
 RAQ_KERNELS="vmlinux.gz vmlinux-nfsroot.gz vmlinux_RAQ.gz vmlinux_raq-2800.gz"
 
 VAR_TARBALLS="base.tgz etc.tgz"
-INST_TARBALLS="base.tgz comp.tgz etc.tgz man.tgz misc.tgz text.tgz"
+INST_TARBALLS="modules.tgz base.tgz comp.tgz etc.tgz man.tgz misc.tgz text.tgz"
 
 DISK=/dev/wd0
 

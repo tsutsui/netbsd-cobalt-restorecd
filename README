@@ -75,14 +75,8 @@ with wget:
    paneltools/paneld/paneld.conf.5 \
    data/cobalt/install/files/usr/share/man/man5
 % usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
-   paneltools/paneld/obj.cobalt/paneld.conf.cat5 \
-   data/cobalt/install/files/usr/share/man/cat5/paneld.conf.0
-% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
    paneltools/paneld/paneld.8 \
    data/cobalt/install/files/usr/share/man/man8
-% usr/src/tooldir.cobalt/bin/mipsel--netbsd-install -c -r -m 444 \
-   paneltools/paneld/obj.cobalt/paneld.cat8 \
-   data/cobalt/install/files/usr/share/man/cat8/paneld.0
 
 3. execute restorecd script
 

@@ -3,3 +3,6 @@
 swap	/etc	mfs	rw,union,-s=1m				0	0
 swap	/var    mfs	rw,-s=4m				0	0
 swap	/tmp    mfs	rw,nodev,noexec,nosuid,-s=1m		0	0
+kernfs	/kern	kernfs	rw					0	0
+procfs	/proc	procfs	rw					0	0
+ptyfs	/dev/pts ptyfs	rw					0	0

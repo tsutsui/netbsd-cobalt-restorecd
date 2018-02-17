@@ -1,4 +1,4 @@
-#	$NetBSD: rc.local,v 1.29 2000/10/07 00:22:44 hubertf Exp $
+#	$NetBSD: rc.local,v 1.32 2008/06/11 17:14:52 perry Exp $
 #	originally from: @(#)rc.local	8.3 (Berkeley) 4/28/94
 #
 # This file is (nearly) the last thing invoked by /etc/rc during a
@@ -10,19 +10,14 @@
 # An alternative option is to create site-specific /etc/rc.d scripts.
 #
 
-#echo -n 'starting local daemons:'
+echo -n 'Starting local daemons:'
 
-# Add your local daemons here.
+# Add your local daemons here, eg:
 #
-
-#if [ -f /usr/pkg/etc/rc.d/apache ]; then
-#	/usr/pkg/etc/rc.d/apache start
+#if [ -x /path/to/daemon ]; then
+#	/path/to/daemon args
 #fi
 
-#echo '.'
+echo '.'
 
-TERM=vt100
-export TERM
-
-/usr/bin/less -c -P "Press 'q' to go to the local console" \
-	/root/instructions.txt
+echo 'Please read /root/instructions.txt for Cobalt ResdoreCD details.'

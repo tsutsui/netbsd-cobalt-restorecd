@@ -7,6 +7,7 @@ cobalt/binary/sets/games.tgz
 cobalt/binary/sets/kern-GENERIC.tgz
 cobalt/binary/sets/man.tgz
 cobalt/binary/sets/misc.tgz
+cobalt/binary/sets/modules.tgz
 cobalt/binary/sets/tests.tgz
 cobalt/binary/sets/text.tgz
 cobalt/binary/sets/xbase.tgz
@@ -22,15 +23,8 @@ cobalt/binary/kernel/netbsd-RAMDISK.gz
 i386/binary/sets/base.tgz
 i386/binary/sets/comp.tgz
 i386/binary/sets/etc.tgz
+i386/binary/sets/modules.tgz
 i386/binary/kernel/netbsd-GENERIC.gz
-shared/ALL/man.tgz
-shared/ALL/misc.tgz
-shared/mipsel/games.tgz
-shared/mipsel/xbase.tgz
-shared/mipsel/xcomp.tgz
-shared/mipsel/xetc.tgz
-shared/mipsel/xfont.tgz
-shared/mipsel/xserver.tgz
 source/sets/gnusrc.tgz
 source/sets/sharesrc.tgz
 source/sets/src.tgz

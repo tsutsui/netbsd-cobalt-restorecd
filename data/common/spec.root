@@ -11,9 +11,11 @@
 ./etc/rc.d/mountmfs type=file uname=root gname=wheel mode=0555
 ./etc/rc.d/netconfig type=file uname=root gname=wheel mode=0555
 ./home type=dir uname=root gname=wheel mode=0755
+./kern type=dir uname=root gname=wheel mode=0755
 ./instructions.txt type=link uname=root gname=wheel mode=0755
 ./netbsd type=file uname=root gname=wheel mode=0755
 ./nfsroot type=dir uname=root gname=wheel mode=0755
+./proc type=dir uname=root gname=wheel mode=0755
 ./root/CHANGES type=file uname=root gname=wheel mode=0644
 ./root/instructions.txt type=file uname=root gname=wheel mode=0644
 ./var type=dir uname=root gname=wheel mode=0755
