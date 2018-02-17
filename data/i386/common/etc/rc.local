@@ -20,4 +20,4 @@ echo -n 'Starting local daemons:'
 
 echo '.'
 
-echo 'Please read /root/instructions.txt for Cobalt ResdoreCD details.'
+echo 'Please read /root/instructions.txt for Cobalt RestoreCD/USB details.'
