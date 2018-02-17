@@ -25,6 +25,13 @@ i386/binary/sets/comp.tgz
 i386/binary/sets/etc.tgz
 i386/binary/sets/modules.tgz
 i386/binary/kernel/netbsd-GENERIC.gz
+shared/ALL/man.tgz
+shared/mipsel/games.tgz
+shared/mipsel/xbase.tgz
+shared/mipsel/xcomp.tgz
+shared/mipsel/xetc.tgz
+shared/mipsel/xfont.tgz
+shared/mipsel/xserver.tgz
 source/sets/gnusrc.tgz
 source/sets/sharesrc.tgz
 source/sets/src.tgz

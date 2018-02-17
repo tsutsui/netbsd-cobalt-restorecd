@@ -74,7 +74,8 @@ fetch_rsync: ${RSYNC}
 fetch_wget: ${WGET}
 	${WGET} --base=${WGET_URL}/ --cut-dirs=${WGET_NCUTDIR} \
 	    --no-host-directories --timestamping --force-directories \
-	    --directory-prefix=${DOWNLOADDIR} --input-file=${FETCH_LIST}
+	    --directory-prefix=${DOWNLOADDIR} --input-file=${FETCH_LIST} \
+	    --retr-symlinks=no
 
 DONE_EXTRACT=	.done_extract
 

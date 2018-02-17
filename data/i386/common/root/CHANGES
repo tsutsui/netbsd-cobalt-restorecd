@@ -1,8 +1,8 @@
-[2018MMDD] A dumb test version for 7.1.1 release
+[20180217] A test version for 7.1.1 release
 ================================
 
 A trial version to test how NetBSD/cobalt kernel itself works.
-Not tested and confirmed well.
+Not well tested, but installation works.
 
 Changes:
 --------
@@ -10,8 +10,7 @@ Changes:
  - apply mechanical changes for NetBSD 7.x
   - adjust ftp server paths
   - cat man pages are no longer installed by default
-  - misc.tgz and other common binary sets seem moved from ALL or mipsel dirs
-    to the port specific dir
+  - misc.tgz set seems moved from ALL dir to the port specific dir
   - modules.tgz has been added
   - bump a size of restoreusb from 512MB to 600MiB
   - adjust restorecd script for tools disklabel changes
