@@ -1,3 +1,12 @@
+[20180401] Welcome to 7.1.2 release
+================================
+
+Changes:
+--------
+ - NetBSD 7.1.2 release binaries
+ - ignore 801.11 wireless adapters on i386 server network configuration
+ - use "telnetd -a none" in inetd.conf(5) to allow login from dumb servers
+
 [20180217] A test version for 7.1.1 release
 ================================
 
