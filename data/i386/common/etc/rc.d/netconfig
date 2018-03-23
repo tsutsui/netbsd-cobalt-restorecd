@@ -22,6 +22,10 @@ for i in `/sbin/ifconfig -l`; do
 		fwip*)
 		;;
 
+		an*|ath*|atu*|atw*|bwfm*|otus*|ral*rum*|rtw*|run*|upgt*|ural*|urtw*|wi*|zyd*)
+		# ignore 801.11 wireless adapters
+		;;
+
 		*)
 		echo "Found interface $i"
 		/sbin/ifconfig $i 10.0.0.254
