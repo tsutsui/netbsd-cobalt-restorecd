@@ -23,13 +23,13 @@ TOUCH?=		touch
 #    and specify appropriate date directory.
 
 #FTP_HOST?=	ftp.NetBSD.org
-#FTP_HOST=	ftp.jp.NetBSD.org
 FTP_HOST=	ftp7.jp.NetBSD.org
+#FTP_HOST=	cdn.NetBSD.org
 
-#DAILY_DIR?=	201401261230Z
+#DAILY_DIR?=	201807211200Z
 #FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
-FTP_DIR?=	pub/NetBSD/NetBSD-7.1.2
+FTP_DIR?=	pub/NetBSD/NetBSD-8.0
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
 # adjuct NCUTDIR by FTP_DIR where you'll get files
