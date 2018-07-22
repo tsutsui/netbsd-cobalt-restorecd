@@ -315,8 +315,9 @@ create_cd()
 		"$_tooldir"/bin/nbmakefs -t cd9660 \
 		    -F $_specfile -N $_cddir/etc -o \
 		    rockridge,label=restorecd,bootimage=i386\;${_bootxx},no-emul-boot,allow-multidot \
-		    "$_filename".tmp $_cddir && \
-		    mv "$_filename".tmp "$_filename"
+		    "$_filename".tmp $_cddir || \
+		    err 255 "Error creating restorecd ISO image."
+		mv "$_filename".tmp "$_filename"
 		log "Building restorecd complete."
 	fi
 	if [ "$_media" = "usb" ]; then
@@ -334,9 +335,11 @@ create_cd()
 		    -M ${FSSIZE} -m ${FSSIZE} \
 		    -F $_specfile -N $_cddir/etc \
 		    -o bsize=${BLOCKSIZE},fsize=${FRAGSIZE},density=${DENSITY} \
-		    "$_filename".tmp $_cddir
+		    "$_filename".tmp $_cddir || \
+		    err 255 "Error creating restoreUSB FFS image."
 		"$_tooldir"/bin/nbinstallboot -v -m i386 \
-		    "$_filename".tmp $_bootxx
+		    "$_filename".tmp $_bootxx || \
+		    err 255 "Error installboot for restoreUSB."
 		log "Preparing disklabel..."
 		cat > $_labelproto <<EOF
 type: ESDI
@@ -363,7 +366,8 @@ a:    ${FSSECTORS} 0 4.2BSD ${FRAGSIZE} ${BLOCKSIZE} 128
 c:    ${FSSECTORS} 0 unused 0 0
 d:    ${FSSECTORS} 0 unused 0 0
 EOF
-		"$_tooldir"/bin/nbdisklabel -M i386 -R -F "$_filename".tmp $_labelproto
+		"$_tooldir"/bin/nbdisklabel -M i386 -R -F "$_filename".tmp $_labelproto || \
+		    err 255 "Error disklabel for restoreUSB."
 		mv "$_filename".tmp "$_filename"
 		log "Building restoreusb complete."
 
