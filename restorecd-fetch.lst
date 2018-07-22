@@ -26,6 +26,7 @@ i386/binary/sets/etc.tgz
 i386/binary/sets/modules.tgz
 i386/binary/kernel/netbsd-GENERIC.gz
 shared/ALL/man.tgz
+shared/ALL/misc.tgz
 shared/mipsel/games.tgz
 shared/mipsel/xbase.tgz
 shared/mipsel/xcomp.tgz
