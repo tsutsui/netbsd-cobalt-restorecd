@@ -320,7 +320,7 @@ create_cd()
 		log "Building restorecd complete."
 	fi
 	if [ "$_media" = "usb" ]; then
-		FSSIZE=`expr 600 \* 1024 \* 1024`
+		FSSIZE=`expr 800 \* 1024 \* 1024`
 		FSSECTORS=`expr ${FSSIZE} / 512`
 		HEADS=64
 		SECTORS=32
