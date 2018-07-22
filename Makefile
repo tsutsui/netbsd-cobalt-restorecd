@@ -12,7 +12,8 @@ TAR?=		tar
 PATCH?=		patch
 FTP?=		ftp
 SH?=		sh
-GZIP?=		gzip
+#GZIP?=		gzip
+GZIP?=		pigz
 MKDIR?=		mkdir
 TOUCH?=		touch
 
@@ -26,10 +27,12 @@ TOUCH?=		touch
 FTP_HOST=	ftp7.jp.NetBSD.org
 #FTP_HOST=	cdn.NetBSD.org
 
+RELEASE=8.0
+RELEASE_DATE=	20180722
 #DAILY_DIR?=	201807211200Z
 #FTP_DIR?=	pub/NetBSD-daily/HEAD/${DAILY_DIR}
 #FTP_DIR?=	pub/NetBSD-daily/netbsd-5/${DAILY_DIR}
-FTP_DIR?=	pub/NetBSD/NetBSD-8.0
+FTP_DIR?=	pub/NetBSD/NetBSD-${RELEASE}
 
 WGET_URL?=	ftp://${FTP_HOST}/${FTP_DIR}
 # adjuct NCUTDIR by FTP_DIR where you'll get files
@@ -153,6 +156,22 @@ ${RESTOREUSB_IMG}: ${DONE_PANELD} ${DONE_COBALT_TOOLS}
                client=`pwd`/${DOWNLOADDIR} \
                source=`pwd`/usr/src  \
                tooldir=`pwd`/usr/src/tooldir.cobalt media=usb -v
+
+IMAGEDIR=images/${RELEASE_DATE}
+RESTORECD_ISO_RELEASE= ${IMAGEDIR}/restorecd-${RELEASE}-${RELEASE_DATE}.iso.gz
+RESTOREUSB_IMG_RELEASE= ${IMAGEDIR}/restoreusb-${RELEASE}-${RELEASE_DATE}.img.gz
+MD5=	cksum -a md5
+SHA512=	cksum -a sha512
+
+release: ${RESTORECD_ISO} ${RESTOREUSB_IMG}
+	mkdir -p ${IMAGEDIR}
+	rm -f ${RESTORECD_ISO_RELEASE} ${RESTOREUSB_IMG_RELEASE}
+	${GZIP} -9c ${RESTORECD_ISO} > ${RESTORECD_ISO_RELEASE}.tmp
+	mv ${RESTORECD_ISO_RELEASE}.tmp ${RESTORECD_ISO_RELEASE}
+	${GZIP} -9c ${RESTOREUSB_IMG} > ${RESTOREUSB_IMG_RELEASE}.tmp
+	mv ${RESTOREUSB_IMG_RELEASE}.tmp ${RESTOREUSB_IMG_RELEASE}
+	(cd ${IMAGEDIR} && ${MD5} *.gz > MD5)
+	(cd ${IMAGEDIR} && ${SHA512} *.gz > SHA512)
 
 clean:
 	rm -f .done_*
