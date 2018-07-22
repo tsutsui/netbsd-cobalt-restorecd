@@ -1,3 +1,11 @@
+[20180722] Welcome to 8.0 release
+================================
+
+Changes:
+--------
+ - NetBSD 8.0 release binaries
+ - disable IPv6 options in named(8) and dhcpd(8)
+
 [20180401] Welcome to 7.1.2 release
 ================================
 
