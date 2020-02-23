@@ -1,3 +1,11 @@
+[20220XXX] Welcome to 9.0 release
+================================
+
+Changes:
+--------
+ - NetBSD 9.0 release binaries
+  - kernel sets and etc.tgz are replaced due to fatal panel(4) rename bugs
+
 [20180722] Welcome to 8.0 release
 ================================
 
