@@ -29,6 +29,7 @@
 ./nfsroot/cobalt/binary/sets/man.tgz type=link uname=root gname=wheel mode=0755
 ./nfsroot/cobalt/binary/sets/misc.tgz type=link uname=root gname=wheel mode=0755
 ./nfsroot/cobalt/binary/sets/modules.tgz type=file uname=root gname=wheel mode=0755
+./nfsroot/cobalt/binary/sets/rescue.tgz type=file uname=root gname=wheel mode=0755
 ./nfsroot/cobalt/binary/sets/tests.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/text.tgz type=file uname=root gname=wheel mode=0644
 ./nfsroot/cobalt/binary/sets/xbase.tgz type=link uname=root gname=wheel mode=0755

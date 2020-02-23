@@ -8,6 +8,7 @@ cobalt/binary/sets/kern-GENERIC.tgz
 cobalt/binary/sets/man.tgz
 cobalt/binary/sets/misc.tgz
 cobalt/binary/sets/modules.tgz
+cobalt/binary/sets/rescue.tgz
 cobalt/binary/sets/tests.tgz
 cobalt/binary/sets/text.tgz
 cobalt/binary/sets/xbase.tgz
@@ -24,6 +25,7 @@ i386/binary/sets/base.tgz
 i386/binary/sets/comp.tgz
 i386/binary/sets/etc.tgz
 i386/binary/sets/modules.tgz
+i386/binary/sets/rescue.tgz
 i386/binary/kernel/netbsd-GENERIC.gz
 shared/ALL/man.tgz
 shared/ALL/misc.tgz
