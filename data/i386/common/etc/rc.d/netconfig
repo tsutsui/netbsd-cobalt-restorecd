@@ -3,7 +3,7 @@
 # $NetBSD$
 #
 
-# BEFORE: named dhcpd nfsd rpcbind mountd dhclient
+# BEFORE: named dhcpd nfsd rpcbind mountd dhcpcd
 # REQUIRE: network mountmfs
 
 echo "Configuring network interface..."

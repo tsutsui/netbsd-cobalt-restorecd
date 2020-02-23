@@ -134,7 +134,7 @@ Warning: A freshly installed box is configured as a DHCP client
          i.e. it tries to obtain its IP address over the network from a DHCP
          server, for initial setup with the i386 server running restorecd.
          To disable this after your own settings are compilete,
-         change /etc/rc.conf to contain "dhclient=NO" line.
+         change /etc/rc.conf to contain "dhcpcd=NO" line.
 
 This file is permanently available as /root/instructions.txt on this restore
 CD.
