@@ -22,7 +22,7 @@ for i in `/sbin/ifconfig -l`; do
 		fwip*)
 		;;
 
-		an*|ath*|atu*|atw*|bwfm*|otus*|ral*rum*|rtw*|run*|upgt*|ural*|urtw*|wi*|zyd*)
+		an*|ath*|atu*|atw*|bwfm*|otus*|ral*|rum*|rtw*|run*|upgt*|ural*|urtw*|wi*|zyd*)
 		# ignore 801.11 wireless adapters
 		;;
 
