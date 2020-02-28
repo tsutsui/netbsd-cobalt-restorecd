@@ -1,10 +1,13 @@
-[20220XXX] Welcome to 9.0 release
+[20220229] Welcome to 9.0 release
 ================================
 
 Changes:
 --------
  - NetBSD 9.0 release binaries
   - kernel sets and etc.tgz are replaced due to fatal panel(4) rename bugs
+  - use patched kernel and etc binary sets to work around PR/55009
+  - replace dhcpcd-hook scripts to work around PR/55011
+   - note dhcpcd(8) won't work correctly on Qube 2700 Ethernet (PR/55010)
 
 [20180722] Welcome to 8.0 release
 ================================
