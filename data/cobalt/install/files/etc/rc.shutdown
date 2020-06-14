@@ -53,7 +53,7 @@ files=$(rcorder -k shutdown ${rcshutdown_rcorder_flags} ${scripts})
 
 for _rc_elem in $(reverse_list $files); do
 	script_name=`basename $_rc_elem`
-	echo -n "[Shutting down]   > $script_name          " > /dev/panel0
+	echo -n "[Shutting down]   > $script_name          " > /dev/lcdpanel0
 	run_rc_script $_rc_elem stop
 done
 

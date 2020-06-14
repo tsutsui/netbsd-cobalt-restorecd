@@ -18,12 +18,12 @@ printmsg()
 	_category="$1"
 	_message="$2"
 
-	if [ ! -f /dev/panel0 ]; then
-		cd /dev && ./MAKEDEV panel
+	if [ ! -f /dev/lcdpanel0 ]; then
+		cd /dev && ./MAKEDEV lcdpanel
 	fi
 
 	echo "$_message"
-	printf "%-16s%-16s" "$_category" "  $_message" > /dev/panel0
+	printf "%-16s%-16s" "$_category" "  $_message" > /dev/lcdpanel0
 }
 
 mountmfs_start()

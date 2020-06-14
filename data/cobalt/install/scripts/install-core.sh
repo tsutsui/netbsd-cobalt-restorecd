@@ -30,7 +30,7 @@ printmsg()
 	echo " ------------------------------------------------"
 	echo ""
 
-	_panel=/dev/panel0
+	_panel=/dev/lcdpanel0
 	[ -c $_panel ] &&
 		printf "%-16s%-16s" "$_category" "  $_message" > $_panel
 }

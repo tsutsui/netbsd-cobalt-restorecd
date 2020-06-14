@@ -166,7 +166,7 @@ rc_real_work()
 		script_name=`basename $_rc_elem`
 		[ "X$script_name" = "Xpaneld" ] && _quiet=1
 		[ -z "$_quiet" ] &&
-			echo -n "[Starting up]     > $script_name          " > /dev/panel0
+			echo -n "[Starting up]     > $script_name          " > /dev/lcdpanel0
 		run_rc_script $_rc_elem start
 		print_rc_metadata "cmd-status:$_rc_elem:$?"
 	done
