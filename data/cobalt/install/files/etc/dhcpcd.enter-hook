@@ -1,0 +1,1 @@
+. /usr/share/examples/dhcpcd/hooks/29-lookup-hostname
