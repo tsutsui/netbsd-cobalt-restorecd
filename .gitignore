@@ -1,7 +1,7 @@
-.done_*
-images
-cd.tmp
-download
-paneltools
-usb.tmp
-usr
+/.done_*
+/images/
+/cd.tmp/
+/download
+/paneltools
+/usb.tmp/
+/usr/
