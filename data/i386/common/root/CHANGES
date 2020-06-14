@@ -1,4 +1,15 @@
-[20220229] Welcome to 9.0 release
+[2020xxxxx] Welcome to 9.1 release
+================================
+
+Changes:
+--------
+ - (not yet) NetBSD 9.1 release binaries
+  - PR/55009 (panel(4) and MAKEDEV(8) errors) has been fixed
+  - update paneld related files for rename of /dev/panel0 -> /dev/lcdpanel0
+  - use /etc/dhcpcd.enter-hook to use DNS for hostname (noted in PR/55011)
+  - note dhcpcd(8) still won't work correctly on Qube 2700 Ethernet (PR/55010)
+
+[20200229] Welcome to 9.0 release
 ================================
 
 Changes:
