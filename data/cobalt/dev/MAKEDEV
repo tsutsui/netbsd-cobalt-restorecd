@@ -561,7 +561,7 @@ all_md)
 	makedev ld0 ld1 ld2 ld3
 	makedev usbs
 	makedev pci0
-	makedev panel
+	makedev lcdpanel
 	makedev altq
 	makedev nsmb
 	;;
@@ -574,8 +574,10 @@ minimal)
 	makedev bpf
 	;;
 
-panel)
-	mkdev panel0 c 36 0 660
+lcdpanel)
+        mkdev lcdpanel0 c 36 0 660
+	# Support the legacy "panel0" name.
+	lndev lcdpanel0 panel0
 	;;
 
 
@@ -634,7 +636,7 @@ all)
 
 init)
 	# prepare minimum devices for restorecd script
-	makedev std ptm wd0 md0 tty00 ttyZ0 panel
+	makedev std ptm wd0 md0 tty00 ttyZ0 lcdpanel
 	;;
 
 audio)
