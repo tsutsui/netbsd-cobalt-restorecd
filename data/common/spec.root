@@ -16,6 +16,7 @@
 ./netbsd type=file uname=root gname=wheel mode=0755
 ./nfsroot type=dir uname=root gname=wheel mode=0755
 ./proc type=dir uname=root gname=wheel mode=0755
+./root/.ssh type=dir uname=root gname=wheel mode=0755
 ./root/CHANGES type=file uname=root gname=wheel mode=0644
 ./root/instructions.txt type=file uname=root gname=wheel mode=0644
 ./var type=dir uname=root gname=wheel mode=0755
