@@ -60,6 +60,8 @@
 ./nfsroot/install/files/etc/rc.d type=dir uname=root gname=wheel mode=0755
 ./nfsroot/install/files/etc/rc.d/paneld type=file uname=root gname=wheel mode=0555
 ./nfsroot/install/files/etc/rc.shutdown type=file uname=root gname=wheel mode=0644
+./nfsroot/install/files/etc/ssh type=dir uname=root gname=wheel mode=0755
+./nfsroot/install/files/etc/ssh/sshd_config type=file uname=root gname=wheel mode=0444
 ./nfsroot/install/files/sbin type=dir uname=root gname=wheel mode=0755
 ./nfsroot/install/files/usr type=dir uname=root gname=wheel mode=0755
 ./nfsroot/install/files/usr/sbin type=dir uname=root gname=wheel mode=0755

@@ -141,6 +141,16 @@ prepare_nfsroot()
 	( cd $basedir/data/cobalt && tar cpf - * ) |
 		( cd "$_nfsdir" && tar xpf - )
 
+	log "Preparing patched sshd_config for ssh root login..."
+	$mv "$_nfsdir/etc/ssh/sshd_config" "$_nfsdir/etc/ssh/sshd_config.orig"
+	$cat $basedir/data/common/sshd_config.prepend \
+		"$_nfsdir/etc/ssh/sshd_config.orig" > \
+		"$_nfsdir/etc/ssh/sshd_config"
+	$rm -f "$_nfsdir/etc/ssh/sshd_config.orig"
+	cd "$_nfsdir" && \
+		( $mkdir -p ./install/files/etc/ssh && \
+		  $cp ./etc/ssh/sshd_config ./install/files/etc/ssh/sshd_config)
+
 	log "Fixing up bootstrap code..."
 	cd "$_nfsdir" && ( $mkdir ./boot &&
 				$gzip -9c ./usr/mdec/boot > ./boot/boot.gz)

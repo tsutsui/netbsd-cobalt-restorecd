@@ -1,0 +1,10 @@
+# !!! Temporary settings for the initial setup of Cobalt RestoreCD/USB. !!!
+# !!! Remove these lines after your own setup is complete. !!!
+AllowUsers root@10.0.0.254
+PermitRootLogin yes
+PermitEmptyPasswords yes
+AuthenticationMethods none
+UsePam no
+IgnoreUserKnownHosts yes
+# !!! End of Cobalt RestoreCD/USB settings !!!
+
