@@ -50,7 +50,6 @@
 ./nfsroot/install/files/etc type=dir uname=root gname=wheel mode=0755
 ./nfsroot/install/files/etc/dhcpcd.enter-hook type=file uname=root gname=wheel mode=0644
 ./nfsroot/install/files/etc/fstab type=file uname=root gname=wheel mode=0644
-./nfsroot/install/files/etc/inetd.conf type=file uname=root gname=wheel mode=0644
 ./nfsroot/install/files/etc/paneld type=dir uname=root gname=wheel mode=0755
 ./nfsroot/install/files/etc/paneld/banner.sh type=file uname=root gname=wheel mode=0755
 ./nfsroot/install/files/etc/paneld/ifread.sh type=file uname=root gname=wheel mode=0755
@@ -61,7 +60,6 @@
 ./nfsroot/install/files/etc/rc.d type=dir uname=root gname=wheel mode=0755
 ./nfsroot/install/files/etc/rc.d/paneld type=file uname=root gname=wheel mode=0555
 ./nfsroot/install/files/etc/rc.shutdown type=file uname=root gname=wheel mode=0644
-./nfsroot/install/files/etc/ttys type=file uname=root gname=wheel mode=0644
 ./nfsroot/install/files/sbin type=dir uname=root gname=wheel mode=0755
 ./nfsroot/install/files/usr type=dir uname=root gname=wheel mode=0755
 ./nfsroot/install/files/usr/sbin type=dir uname=root gname=wheel mode=0755
