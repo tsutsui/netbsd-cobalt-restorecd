@@ -1,0 +1,2 @@
+# RestoreCD/USB client always regenerates host keys on each boot.
+StrictHostKeyChecking no
