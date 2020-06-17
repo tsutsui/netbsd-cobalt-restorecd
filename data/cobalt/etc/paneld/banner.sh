@@ -2,6 +2,7 @@
 
 AWK=/usr/bin/awk
 GREP=/usr/bin/grep
+SED=/usr/bin/sed
 TAIL=/usr/bin/tail
 
 DIG=/usr/bin/dig
@@ -14,7 +15,7 @@ HOST=`/bin/hostname`
 if [ -f $ETC_IFCONFIG ]; then
 	ADDR=`$AWK '{ print $2 }' $ETC_IFCONFIG`
 else
-	ADDR=`$IFCONFIG tlp0 | $GREP 'inet ' | $AWK '{ print $2 }'`
+	ADDR=`$IFCONFIG tlp0 | $GREP 'inet ' | $AWK '{ print $2 }' | $SED 's,/[0-9]*,,'`
 fi
 
 if [ "$HOST" != "" ]; then
