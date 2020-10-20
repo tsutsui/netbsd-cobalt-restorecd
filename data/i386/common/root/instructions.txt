@@ -8,7 +8,7 @@ Welcome to the NetBSD/cobalt installation.
 This file is brought to you by 'less', press <space> to read more.
 
 Please also refer "NetBSD/cobalt Restore CD HOWTO" page for updated info.
-http://www.NetBSD.org/ports/cobalt/restorecd-howto.html
+https://www.NetBSD.org/ports/cobalt/restorecd-howto.html
 
 ===========================
 Minimum System Requirements
@@ -102,8 +102,8 @@ Warning: Please note that the installation process may take a while.
 
 8.	BE AWARE that a newly installed box is left in a highly insecure state.
 
-	All ttys are open by default and allow root access over the network.
-	Also, telnet and rlogin ports are open.  This is done to allow you
+	Root access via sshd(8) without password from your i386 server is
+        permitted.  This is done to allow you
 	to login into the fresh box in order to make necessary configuration
 	changes.
 
@@ -111,11 +111,8 @@ Warning: Please note that the installation process may take a while.
         before connecting it to an open network:
 
           * set root password by passwd(1)
-          * remove all pseudo terminal (tty[pqrs]?) lines from /etc/ttys,
-            or remove "secure" field from such pseudo terminals
-          * comment out telnet and rlogin lines in /etc/inetd.conf
-            if you don't really want to enable those services by default
-            (it might be better to use sshd(8))
+          * remove the "Cobalt RestoreCD/USB settings" lines in
+            /etc/sshd/sshd_config to disable root access via sshd(8).
           * add new users with user(8) etc.
           * put users who need root access via su(1) in the "wheel" group
             by editing the /etc/group file
@@ -127,7 +124,7 @@ Warning: Please note that the installation process may take a while.
         to the cobalt architecture, but will give you some
 	background information on configuring NetBSD in general.
 
-        The NetBSD Guide http://www.NetBSD.org/docs/guide/en/index.html
+        The NetBSD Guide https://www.NetBSD.org/docs/guide/en/index.html
         also provides helpful information.
 
 Warning: A freshly installed box is configured as a DHCP client
@@ -195,16 +192,16 @@ Further Information
 ===================
 
 NetBSD home page
-	http://www.NetBSD.org/
+	https://www.NetBSD.org/
 
 NetBSD/cobalt port page
-	http://www.NetBSD.org/oorts/cobalt/
+	https://www.NetBSD.org/ports/cobalt/
 
 NetBSD/cobalt FAQ
-	http://www.NetBSD.org/ports/cobalt/faq.html
+	https://www.NetBSD.org/ports/cobalt/faq.html
 
 The NetBSD Guide
-	http://www.NetBSD.org/docs/guide/en/
+	https://www.NetBSD.org/docs/guide/en/
 
 general instructions on configuring a fresh NetBSD install
 	man afterboot

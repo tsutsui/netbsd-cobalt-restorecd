@@ -1,9 +1,9 @@
 #!/bin/sh -
 #
 # Generated from:
-#	NetBSD: MAKEDEV.awk,v 1.26.2.1 2019/11/04 14:35:57 martin Exp 
-#	NetBSD: MAKEDEV.tmpl,v 1.205.2.2 2019/11/10 12:58:31 martin Exp 
-#	NetBSD: etc.cobalt/MAKEDEV.conf,v 1.16 2018/09/23 09:20:58 maxv Exp 
+#	NetBSD: MAKEDEV.awk,v 1.26.2.2 2020/06/20 16:19:43 martin Exp 
+#	NetBSD: MAKEDEV.tmpl,v 1.205.2.3 2020/03/19 19:08:31 martin Exp 
+#	NetBSD: etc.cobalt/MAKEDEV.conf,v 1.16.2.1 2020/06/20 16:19:43 martin Exp 
 #
 # Copyright (c) 2003,2007,2008 The NetBSD Foundation, Inc.
 # All rights reserved.
@@ -575,7 +575,7 @@ minimal)
 	;;
 
 lcdpanel)
-        mkdev lcdpanel0 c 36 0 660
+	mkdev lcdpanel0 c 36 0 660
 	# Support the legacy "panel0" name.
 	lndev lcdpanel0 panel0
 	;;
@@ -631,6 +631,7 @@ all)
 	makedev veriexec
 	makedev autofs
 	makedev fw0 fw1 fw2 fw3
+	makedev ipmi0
 	makedev local # do this last
 	;;
 
