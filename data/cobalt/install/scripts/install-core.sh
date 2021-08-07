@@ -16,6 +16,8 @@ part_start=0
 
 sector_size=512
 
+umask 022
+
 #
 # printmsg <category> <msg>
 #	Print a message on console and on Cobalt LCD screen.
