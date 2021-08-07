@@ -1,3 +1,12 @@
+[20210807] Welcome to 9.2 release
+================================
+
+Changes:
+--------
+ - NetBSD 9.2 release binaries
+ - fix a missed panel -> lcdpanel rename change in the install script
+ - fix permission issue in /ext2 partition
+
 [20201024] Welcome to 9.1 release
 ================================
 
