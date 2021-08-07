@@ -310,7 +310,7 @@ install()
 	$TOUCH $PTAB
 
 	# Create LCD device
-	cd /dev && ./MAKEDEV panel
+	cd /dev && ./MAKEDEV lcdpanel
 
 	# 1. Create partition table.
 	clear_disk
